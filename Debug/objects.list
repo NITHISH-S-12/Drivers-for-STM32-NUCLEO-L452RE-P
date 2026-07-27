@@ -1,0 +1,6 @@
+"./Src/main.o"
+"./Src/syscalls.o"
+"./Src/sysmem.o"
+"./Startup/startup_stm32l452retxp.o"
+"./drivers/Src/stm32l452xx_gpio_driver.o"
+"./drivers/Src/stm32l452xx_spi_driver.o"

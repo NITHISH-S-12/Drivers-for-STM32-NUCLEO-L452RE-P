@@ -1,0 +1,4 @@
+../drivers/Src/stm32l452xx_spi_driver.c:12:6:SPI_PeriClockControl	16	static
+../drivers/Src/stm32l452xx_spi_driver.c:31:6:SPI_Init	24	static
+../drivers/Src/stm32l452xx_spi_driver.c:80:9:SPI_GetFlagStatus	16	static
+../drivers/Src/stm32l452xx_spi_driver.c:90:6:SPI_SendData	24	static
