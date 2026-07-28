@@ -227,8 +227,6 @@ typedef struct
 /*
  * Peripheral register definition structure for SPI
  */
-
-
 typedef struct
 {
 	__vo uint32_t CR1;
@@ -256,6 +254,15 @@ typedef struct
 #define SPI3_PCLK_EN() 		(RCC->APB1ENR1) |= (1<<15)
 
 
+/*
+ * Macros to reset the GPIOx peripherals
+ */
+#define GPIOA_REG_RESET() 				do {(RCC->AHB2RSTR) |= (1 << 0); (RCC->AHB2RSTR) &= ~(1 << 0);}while(0)
+#define GPIOB_REG_RESET() 				do {(RCC->AHB2RSTR) |= (1 << 1); (RCC->AHB2RSTR) &= ~(1 << 1);}while(0)
+#define GPIOC_REG_RESET() 				do {(RCC->AHB2RSTR) |= (1 << 2); (RCC->AHB2RSTR) &= ~(1 << 2);}while(0)
+#define GPIOD_REG_RESET() 				do {(RCC->AHB2RSTR) |= (1 << 3); (RCC->AHB2RSTR) &= ~(1 << 3);}while(0)
+#define GPIOE_REG_RESET() 				do {(RCC->AHB2RSTR) |= (1 << 4); (RCC->AHB2RSTR) &= ~(1 << 4);}while(0)
+#define GPIOH_REG_RESET() 				do {(RCC->AHB2RSTR) |= (1 << 7); (RCC->AHB2RSTR) &= ~(1 << 7);}while(0)
 
 //some generic macros
 #define ENABLE  		1

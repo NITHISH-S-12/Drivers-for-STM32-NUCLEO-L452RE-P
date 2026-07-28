@@ -30,7 +30,7 @@ typedef struct
 typedef struct
 {
 	GPIO_RegDef_t *pGPIOx;  /*This hold the base address of the GPIO port to which the pin belong*/
-	GPIO_PinConfig_t *GPIO_PinConfig; /*This holds GPIO pin configuration settings*/
+	GPIO_PinConfig_t GPIO_PinConfig; /*This holds GPIO pin configuration settings*/
 
 }GPIO_Handle_t;
 
@@ -42,10 +42,21 @@ typedef struct
 #define 	GPIO_PIN_NO_0			0
 #define 	GPIO_PIN_NO_1			1
 #define 	GPIO_PIN_NO_2			2
-
-
+#define		GPIO_PIN_NO_3			3
+#define		GPIO_PIN_NO_4			4
+#define		GPIO_PIN_NO_5			5
+#define		GPIO_PIN_NO_6			6
+#define		GPIO_PIN_NO_7			7
+#define		GPIO_PIN_NO_8			8
+#define		GPIO_PIN_NO_9			9
+#define		GPIO_PIN_NO_10			10
+#define		GPIO_PIN_NO_11			11
+#define		GPIO_PIN_NO_12			12
+#define		GPIO_PIN_NO_13			13
+#define		GPIO_PIN_NO_14			14
+#define		GPIO_PIN_NO_15			15
 /*
- * PIO_PIN_MODES
+ * GPIO_PIN_MODES
  * GPIO pin possible modes
  */
 #define GPIO_MODE_IN 		0
@@ -89,7 +100,7 @@ void GPIO_PeriClockControl(GPIO_RegDef_t *pGPIOx, uint8_t EnorDi); /*Enable or D
 /*
  * INit and Deinit
  */
-void GPIO_Init(GPIO_RegDef_t *pGPIOx); /*Initialize the given GPIO port and pin*/ /*Input is base address of GPIO*/
+void GPIO_Init(GPIO_Handle_t *pGPIOHandle); /*Initialize the given GPIO port and pin*/ /*Input is base address of GPIO*/
 void GPIO_DeInit(void); /*Deinitialize the given GPIO port and pin(giving GPIO port settings to reset state)*/
 
 /*
