@@ -101,7 +101,7 @@ void GPIO_PeriClockControl(GPIO_RegDef_t *pGPIOx, uint8_t EnorDi); /*Enable or D
  * INit and Deinit
  */
 void GPIO_Init(GPIO_Handle_t *pGPIOHandle); /*Initialize the given GPIO port and pin*/ /*Input is base address of GPIO*/
-void GPIO_DeInit(void); /*Deinitialize the given GPIO port and pin(giving GPIO port settings to reset state)*/
+void GPIO_DeInit(GPIO_RegDef_t *pGPIOx); /*Deinitialize the given GPIO port and pin(giving GPIO port settings to reset state)*/
 
 /*
  * Data Read and Write
@@ -109,14 +109,15 @@ void GPIO_DeInit(void); /*Deinitialize the given GPIO port and pin(giving GPIO p
 uint8_t GPIO_ReadFromInputPin(GPIO_RegDef_t *pGPIOx, uint8_t PinNumber); /*Read the value from input pin*//*Input based address of GPIO, pinnumber(totally 16 pins in each port so 8 bits is enough to represent pin number) nad value will be either  0 0r 1 in that pin so return type will b	e uint8_t*/
 uint16_t GPIO_ReadFromInputPort(GPIO_RegDef_t *pGPIOx);/*Read the value from input port*/ /*returntype is uint16_t because the value in each pin of port(16pins in each port)*/
 void GPIO_WriteToOutputPin(GPIO_RegDef_t *pGPIOx, uint8_t pinNumber, uint8_t Value);/*Write the value to output pin*/
-void GPIO_WriteToOutputPort(GPIO_RegDef_t *pGPIOx);/*Write the value to output port*/
+void GPIO_WriteToOutputPort(GPIO_RegDef_t *pGPIOx, uint16_t Value);/*Write the value to output port*/
 void GPIO_ToggleOutputPin(GPIO_RegDef_t *pGPIOx, uint8_t PinNumber);/*To toggle the output pin*/
 
 /*
  * IRQ Configuration and ISR handling
  */
-void GPIO_IRQConfig(uint8_t IRQNumber, uint8_t IRQPriority, uint8_t EnorDi);/*Configure the IRQ number of GPIO pin(enabling and setup the interrupt number)*/
-void GPIO_IRQHandling(uint8_t PinNumber);/*IRQ handling means whenever the interrupt triggers the user application, then the user application call this IRQ handling function to process the interrupt*/
+
+//void GPIO_IRQConfig(uint8_t IRQNumber, uint8_t IRQPriority, uint8_t EnorDi);/*Configure the IRQ number of GPIO pin(enabling and setup the interrupt number)*/
+//void GPIO_IRQHandling(uint8_t PinNumber);/*IRQ handling means whenever the interrupt triggers the user application, then the user application call this IRQ handling function to process the interrupt*/
 
 #endif /* INC_STM32L452XX_GPIO_DRIVER_H_ */
 

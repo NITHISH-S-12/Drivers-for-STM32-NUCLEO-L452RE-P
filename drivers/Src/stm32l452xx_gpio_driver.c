@@ -97,7 +97,7 @@ void GPIO_Init(GPIO_Handle_t *pGPIOHandle)
 		temp = (pGPIOHandle->GPIO_PinConfig.GPIO_PinMode << (2 * pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber));
 
 		//clear the bits at the specific position in MODER register
-		pGPIOHandle->pGPIOx->MODER &= ~(0x3 << pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber);
+		pGPIOHandle->pGPIOx->MODER &= ~(0x3 << (2*pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber));
 
 		//We will place the temp value to corresponding MODER register
 		pGPIOHandle->pGPIOx->MODER |= temp; //We should use bitwise or instead of assignment operator because we shouldnot change the content which is there already in a particular register
@@ -114,7 +114,7 @@ void GPIO_Init(GPIO_Handle_t *pGPIOHandle)
 	temp = (pGPIOHandle->GPIO_PinConfig.GPIO_PinSpeed << (2 * pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber));
 
 	//clear the bits at the specific position in speed register
-	pGPIOHandle->pGPIOx->OSPEEDR &= ~(0x3 << pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber);
+	pGPIOHandle->pGPIOx->OSPEEDR &= ~(0x3 << (2*pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber));
 
 	//set the bits at the corresponding bit positions for that specific pin number in speed register
 	pGPIOHandle->pGPIOx->OSPEEDR |= temp;
@@ -125,7 +125,7 @@ void GPIO_Init(GPIO_Handle_t *pGPIOHandle)
 	temp = (pGPIOHandle-> GPIO_PinConfig.GPIO_PinPuPdControl << (2 * pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber));
 
 	//clear the bits at the corresponding bit positions for that specific pin number
-	pGPIOHandle->pGPIOx->PUPDR &= ~(0x3 << pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber);
+	pGPIOHandle->pGPIOx->PUPDR &= ~(0x3 << (2* pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber));
 
 	//set the bits at the corresponding bit positions for that specific pin number in pupd register
 	pGPIOHandle->pGPIOx->PUPDR |= temp;
@@ -143,7 +143,7 @@ void GPIO_Init(GPIO_Handle_t *pGPIOHandle)
 
 	temp = 0;
 	//5.Configure the alt function of register
-	if(pGPIOHandle->GPIO_PinConfig.GPIO_PinAltFunMode == GPIO_MODE_ALTFN)
+	if(pGPIOHandle->GPIO_PinConfig.GPIO_PinMode == GPIO_MODE_ALTFN)
 	{
 		uint32_t temp1, temp2;
 		temp1 = (pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber/8); //decide AFR[0] or AFR[1]
@@ -154,9 +154,10 @@ void GPIO_Init(GPIO_Handle_t *pGPIOHandle)
 
 		//set the bits at the corresponding bit positions for that specific pin number in the alt function register
 		pGPIOHandle->pGPIOx->AFR[temp1] |= (pGPIOHandle->GPIO_PinConfig.GPIO_PinAltFunMode << (4*temp2));
-
+	}
 }
-void GPIO_DeInit(void)
+
+void GPIO_DeInit(GPIO_RegDef_t *pGPIOx)
 {
 
 //Reset the GPIOs register uisng the RCC_AHB2RSTR register
@@ -197,13 +198,39 @@ uint8_t GPIO_ReadFromInputPin(GPIO_RegDef_t *pGPIOx, uint8_t PinNumber)/*Read th
 	return value;
 }
 
-uint16_t GPIO_ReadFromInputPort(GPIO_RegDef_t *pGPIOx);/*Read the value from input port*/ /*returntype is uint16_t because the value in each pin of port(16pins in each port)*/
-void GPIO_WriteToOutputPin(GPIO_RegDef_t *pGPIOx, uint8_t pinNumber, uint8_t Value);/*Write the value to output pin*/
-void GPIO_WriteToOutputPort(GPIO_RegDef_t *pGPIOx);/*Write the value to output port*/
-void GPIO_ToggleOutputPin(GPIO_RegDef_t *pGPIOx, uint8_t PinNumber);/*To toggle the output pin*/
+uint16_t GPIO_ReadFromInputPort(GPIO_RegDef_t *pGPIOx)/*Read the value from input port*/ /*returntype is uint16_t because the value in each pin of port(16pins in each port)*/
+{
+	uint8_t value;
+	value = (uint16_t)(pGPIOx->IDR);
+	return value;
+}
+void GPIO_WriteToOutputPin(GPIO_RegDef_t *pGPIOx, uint8_t pinNumber, uint8_t Value)/*Write the value to output pin*/
+{
+	if(Value == GPIO_PIN_SET)
+	{
+		//Write 1 to the output data register at the bit field corresponding to the pin number
+		pGPIOx->ODR |= 1 << pinNumber;
+	}
+	else
+	{
+		//Write 0 to the output data register at the bit field corresponding to the pin number
+		pGPIOx->ODR &= ~(1 << pinNumber);
+	}
+}
+void GPIO_WriteToOutputPort(GPIO_RegDef_t *pGPIOx, uint16_t Value)/*Write the value to output port*/
+{
+	pGPIOx->ODR |= Value;
+}
+
+void GPIO_ToggleOutputPin(GPIO_RegDef_t *pGPIOx, uint8_t PinNumber)/*To toggle the output pin*/
+{
+	pGPIOx->ODR ^= (1 << PinNumber);
+
+}
 
 /*
  * IRQ Configuration and ISR handling
- */
-void GPIO_IRQConfig(uint8_t IRQNumber, uint8_t IRQPriority, uint8_t EnorDi);/*Configure the IRQ number of GPIO pin(enabling and setup the interrupt number)*/
-void GPIO_IRQHandling(uint8_t PinNumber);/*IRQ handling means whenever the interrupt triggers the user application, then the user application call this IRQ handling function t
+*/
+//void GPIO_IRQConfig(uint8_t IRQNumber, uint8_t IRQPriority, uint8_t EnorDi);/*Configure the IRQ number of GPIO pin(enabling and setup the interrupt number)*/
+//void GPIO_IRQHandling(uint8_t PinNumber);/*IRQ handling means whenever the interrupt triggers the user application, then the user application call this IRQ handling function t
+
