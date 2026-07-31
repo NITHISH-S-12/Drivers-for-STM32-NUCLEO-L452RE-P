@@ -31,13 +31,13 @@ int main (void)
 
     while(1)
     {
-    	GPIO_ToggleOutputPin(GPIOB, GPIO_PIN_NO_13);
-    	delay();
+    	//GPIO_ToggleOutputPin(GPIOB, GPIO_PIN_NO_13);
+    	//delay();
 
     	//GPIO_WriteToOutputPin(GPIOB, GPIO_PIN_NO_13, 1);
     	//delay();
-    	//GPIO_WriteToOutputPin(GPIOB, GPIO_PIN_NO_13, 0);
-    	//delay();
+    	GPIO_WriteToOutputPin(GPIOB, GPIO_PIN_NO_13, 0);
+    	delay();
     }
     return 0;
 

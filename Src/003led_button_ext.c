@@ -1,15 +1,18 @@
 /*
- * 002led_button.c
+ * 003led_button_ext.c
  *
- *  Created on: Jul 30, 2026
+ *  Created on: Jul 31, 2026
  *      Author: cdac
  */
+
+
 
 #include "stm32l452xx.h"
 #include "stm32l452xx_gpio_driver.h"
 
 #define HIGH 			1
-#define BTN_PRESSED 	HIGH
+#define LOW 			0
+#define BTN_PRESSED 	LOW
 void delay(void)
 {
 	//for(volatile uint32_t i=0; i < 500000; i++);
@@ -31,7 +34,8 @@ int main (void)
 	GpioLed.GPIO_PinConfig.GPIO_PinOPType = GPIO_OP_TYPE_PP;
     GpioLed.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_NO_PUPD;
 
-    GPIO_PeriClockControl(GPIOB, ENABLE);
+
+    GPIO_PeriClockControl(GPIOB , ENABLE);
     GPIO_Init(&GpioLed);
 
 
@@ -50,7 +54,7 @@ int main (void)
     	if(GPIO_ReadFromInputPin(GPIOC,GPIO_PIN_NO_13) == BTN_PRESSED)
     	{
     	  delay();//This delay given because to give time for debouncing of user button, other wise this loop executes multiple times
-    	  GPIO_ToggleOutputPin(GPIOB, GPIO_PIN_NO_13);
+    	  GPIO_WriteToOutputPin(GPIOB,GPIO_PIN_NO_13, ENABLE);
     	}
 
 
