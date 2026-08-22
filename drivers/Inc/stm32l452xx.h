@@ -176,6 +176,43 @@ typedef struct
 } RCC_RegDef_t;
 
 
+
+
+/*
+ * Peripheral register definition structure for EXTI
+ */
+typedef struct
+{
+	__vo uint32_t IMR1;
+	__vo uint32_t EMR1;
+	__vo uint32_t RTSR1;
+	__vo uint32_t FTSR1;
+	__vo uint32_t SWIER1;
+	__vo uint32_t EXTI_PR1;
+	__vo uint32_t EXTI_IMR2;
+	__vo uint32_t EXTI_EMR2;
+	__vo uint32_t EXTI_RTSR2;
+	__vo uint32_t EXTI_FTSR2;
+	__vo uint32_t SWIER2;
+	__vo uint32_t EXTI_PR2;
+
+}EXTI_RegDef_t;
+
+
+/*
+ * Peripheral register definition structure for SYSCFG
+ */
+typedef struct
+{
+	__vo uint32_t MEMRMP;
+	__vo uint32_t CFGR1;
+	__vo uint32_t EXTICR[4];
+	__vo uint32_t CSR;
+	__vo uint32_t CFGR2;
+	__vo uint32_t SWPR;
+	__vo uint32_t SKR;
+}SYSCFG_RegDef_t;
+
 /*
  * Peripheral register definition structure for GPIO
  */
@@ -193,6 +230,8 @@ typedef struct
 	__vo uint32_t BRR;
 }GPIO_RegDef_t;
 
+
+
 #define GPIOA 					((GPIO_RegDef_t*)GPIOA_BASE)
 #define GPIOB 					((GPIO_RegDef_t*)GPIOB_BASE)
 #define GPIOC					((GPIO_RegDef_t*)GPIOC_BASE)
@@ -200,7 +239,7 @@ typedef struct
 #define GPIOE 					((GPIO_RegDef_t*)GPIOE_BASE)
 #define GPIOH					((GPIO_RegDef_t*)GPIOH_BASE)
 
-
+#define EXTI					((EXTI_RegDef_t*)EXTI_BASE)
 /*
  * Clock Enable Macro for GPIOx peripheral
  */
@@ -223,6 +262,15 @@ typedef struct
 #define GPIOH_PCLK_DI()			(RCC->AHB2ENR &= ~(1 << 6))
 
 
+/*
+ * Clock Enable Macro for SYSCFG peripheral
+ */
+#define SYSCFG_PCLK_EN()		(RCC->APB2ENR |= (1 << 0))
+
+/*
+ * CLock Disable Macro for SYSCFG peripheral
+ */
+#define SYSCFG_PCLK_EN()		(RCC->APB2ENR |= (0 << 0))
 
 /*
  * Peripheral register definition structure for SPI
@@ -252,6 +300,12 @@ typedef struct
 #define SPI1_PCLK_EN() 		(RCC->APB2ENR) |= (1<<12)
 #define SPI2_PCLK_EN() 		(RCC->APB1ENR1) |= (1<<14)
 #define SPI3_PCLK_EN() 		(RCC->APB1ENR1) |= (1<<15)
+
+
+/*
+ * Clock Enable Macros for SYSCFG peripheral
+ */
+#define
 
 
 /*

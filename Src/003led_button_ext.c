@@ -63,3 +63,7 @@ int main (void)
     return 0;
 
 }
+void I2C1_EV_IRQHandler(void)
+{
+
+}
