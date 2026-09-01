@@ -11,6 +11,11 @@
 #include<stdint.h>
 #define __vo volatile
 
+/****************************************PROCESSOR SPCIFIC DETAILS*****************************************/
+/*
+ * ARM Cortex Mx Processor NVIC ISERx register Addresses
+ */
+
 /*
  * Base addresses of Flash and SRAM memories
  */
@@ -240,6 +245,8 @@ typedef struct
 #define GPIOH					((GPIO_RegDef_t*)GPIOH_BASE)
 
 #define EXTI					((EXTI_RegDef_t*)EXTI_BASE)
+
+#define SYSCFG				    ((SYSCFG_RegDef_t*)SYSCFG_BASE)
 /*
  * Clock Enable Macro for GPIOx peripheral
  */
@@ -270,7 +277,7 @@ typedef struct
 /*
  * CLock Disable Macro for SYSCFG peripheral
  */
-#define SYSCFG_PCLK_EN()		(RCC->APB2ENR |= (0 << 0))
+#define SYSCFG_PCLK_DI()		(RCC->APB2ENR |= (0 << 0))
 
 /*
  * Peripheral register definition structure for SPI
@@ -302,10 +309,6 @@ typedef struct
 #define SPI3_PCLK_EN() 		(RCC->APB1ENR1) |= (1<<15)
 
 
-/*
- * Clock Enable Macros for SYSCFG peripheral
- */
-#define
 
 
 /*
@@ -318,6 +321,17 @@ typedef struct
 #define GPIOE_REG_RESET() 				do {(RCC->AHB2RSTR) |= (1 << 4); (RCC->AHB2RSTR) &= ~(1 << 4);}while(0)
 #define GPIOH_REG_RESET() 				do {(RCC->AHB2RSTR) |= (1 << 7); (RCC->AHB2RSTR) &= ~(1 << 7);}while(0)
 
+
+
+/*
+ * This macro returns from 0 to 4 or 7 for a given GPIO base address(x)
+ */
+#define GPIO_BASEADDR_TO_CODE(x)      	( (x == GPIOA)?0 :\
+										  (x == GPIOB)?1 :\
+										  (x == GPIOC)?2 :\
+										  (x == GPIOD)?3 :\
+										  (x == GPIOE)?4 :\
+										  (x == GPIOH)?7 : 0)
 //some generic macros
 #define ENABLE  		1
 #define DISABLE 		0

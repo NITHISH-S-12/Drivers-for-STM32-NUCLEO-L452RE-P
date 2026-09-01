@@ -112,14 +112,14 @@ void GPIO_Init(GPIO_Handle_t *pGPIOHandle)
 			//Clear the corresponding RTSR bit because previous configuration may enable this bit)
 			EXTI->RTSR1 &= ~(1 << pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber);
 		}
-		else if(pGPIOHandle->GPIO_PinConfig->GPIO_PinMode == GPIO_MODE_IT_RT)
+		else if(pGPIOHandle->GPIO_PinConfig.GPIO_PinMode == GPIO_MODE_IT_RT)
 		{
 			//Configure the Rising trigger selection register(RTSR)
 			EXTI->RTSR1 |= (1 << pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber);
 			//Clear the corresponding FTSR bit because previous configuration may enable this bit)
 			EXTI->FTSR1 &= ~(1 << pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber);
 		}
-		else if(pGPIOHandle->GPIO_PinConfig->GPIO_PinMode == GPIO_MODE_IT_RFT)
+		else if(pGPIOHandle->GPIO_PinConfig.GPIO_PinMode == GPIO_MODE_IT_RFT)
 		{
 			//Configure both FTSR and RTSR
 			EXTI->FTSR1 |= (1<< pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber);
@@ -127,6 +127,11 @@ void GPIO_Init(GPIO_Handle_t *pGPIOHandle)
 
 		}
 		//2. Configure the GPIO port selection in SYSCFG_EXTICR
+		uint8_t temp1 = pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber / 3;
+		uint8_t temp2 = pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber % 3;
+		uint8_t portcode = GPIO_BASEADDR_TO_CODE(pGPIOHandle->pGPIOx);
+		SYSCFG_PCLK_EN();
+		SYSCFG->EXTICR[temp1] = portcode << (4*temp2);
 
 		//3. Enable the EXTI interrupt delivery using the IMR register
 		EXTI->IMR1 |= (1<<pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber);
@@ -256,6 +261,41 @@ void GPIO_ToggleOutputPin(GPIO_RegDef_t *pGPIOx, uint8_t PinNumber)/*To toggle t
 /*
  * IRQ Configuration and ISR handling
 */
-//void GPIO_IRQConfig(uint8_t IRQNumber, uint8_t IRQPriority, uint8_t EnorDi);/*Configure the IRQ number of GPIO pin(enabling and setup the interrupt number)*/
+/*Configure the IRQ number of GPIO pin(enabling and setup the interrupt number)*/
+void GPIO_IRQConfig(uint8_t IRQNumber, uint8_t IRQPriority, uint8_t EnorDi)
+{
+	if(EnorDi == ENABLE)
+	{
+		if(IRQNumber <= 31)
+		{
+					//Program ISER0 register
+		}
+		else if(IRQNumber > 32 && IRQNumber < 64)
+		{
+			//Program ISER1 register
+		}
+		else if(IRQNumber >= 64 && IRQNumber < 96)
+		{
+			//Program ISER2 register
+		}
+
+	}
+	else
+	{
+				if(IRQNumber <= 31)
+				{
+						//Program ICER0 register
+				}
+				else if(IRQNumber > 32 && IRQNumber < 64)
+				{
+					//Program ICER1 register
+				}
+				else if(IRQNumber >= 64 && IRQNumber < 96)
+				{
+					//Program ICER2 register
+				}
+
+	}
+}
 //void GPIO_IRQHandling(uint8_t PinNumber);/*IRQ handling means whenever the interrupt triggers the user application, then the user application call this IRQ handling function t
 
