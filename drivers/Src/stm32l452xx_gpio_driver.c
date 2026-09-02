@@ -262,7 +262,7 @@ void GPIO_ToggleOutputPin(GPIO_RegDef_t *pGPIOx, uint8_t PinNumber)/*To toggle t
  * IRQ Configuration and ISR handling
 */
 /*Configure the IRQ number of GPIO pin(enabling and setup the interrupt number)*/
-void GPIO_IRQConfig(uint8_t IRQNumber, uint8_t IRQPriority, uint8_t EnorDi)
+void GPIO_IRQInterrruptConfig(uint8_t IRQNumber, uint8_t IRQPriority, uint8_t EnorDi)
 {
 	if(EnorDi == ENABLE)
 	{

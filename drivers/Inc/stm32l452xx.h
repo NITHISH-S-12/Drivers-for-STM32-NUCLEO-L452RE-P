@@ -31,6 +31,16 @@
 
 
 /*
+ * ARM Cortex Mx Processor NVIC ICERx register Addresses
+ */
+#define NVIC_PR_BASE_ADDR 	((__vo uint32_t*)0xE000E400)
+
+/*
+ * ARM Cortex Mx Processor number of priority bits implemented in Priority Register
+ */
+#define NO_PR_BITS_IMPLEMENTED		4
+
+/*
  * Base addresses of Flash and SRAM memories
  */
 
