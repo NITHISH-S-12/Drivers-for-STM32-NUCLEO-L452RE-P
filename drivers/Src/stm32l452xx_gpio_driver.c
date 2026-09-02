@@ -268,15 +268,18 @@ void GPIO_IRQConfig(uint8_t IRQNumber, uint8_t IRQPriority, uint8_t EnorDi)
 	{
 		if(IRQNumber <= 31)
 		{
-					//Program ISER0 register
+			//Program ISER0 register
+			*NVIC_ISER0 |= (1 << IRQNumber);  //for upto 31 IRQ Number
 		}
 		else if(IRQNumber > 32 && IRQNumber < 64)
 		{
 			//Program ISER1 register
+			*NVIC_ISER1 |= (1 << IRQNumber%32); //for upto 32 to 64 IRQ Number
 		}
 		else if(IRQNumber >= 64 && IRQNumber < 96)
 		{
-			//Program ISER2 register
+			//Program ISER2 register 		 //for upto 64 to 95 IRQ Number
+			*NVIC_ISER2 |= (1 << IRQNumber%64); //for upto 32 to 64 IRQ Number
 		}
 
 	}
@@ -284,15 +287,14 @@ void GPIO_IRQConfig(uint8_t IRQNumber, uint8_t IRQPriority, uint8_t EnorDi)
 	{
 				if(IRQNumber <= 31)
 				{
-						//Program ICER0 register
+					*NVIC_ICER0 |= (1 << IRQNumber);  //for upto 31 IRQ Number//Program ICER0 register
 				}
 				else if(IRQNumber > 32 && IRQNumber < 64)
 				{
-					//Program ICER1 register
 				}
 				else if(IRQNumber >= 64 && IRQNumber < 96)
 				{
-					//Program ICER2 register
+					*NVIC_ICER2 |= (1 << IRQNumber%64); //for upto 32 to 64 IRQ Number//Program ICER2 register
 				}
 
 	}

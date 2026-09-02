@@ -6,3 +6,4 @@
 ../drivers/Src/stm32l452xx_gpio_driver.c:237:6:GPIO_WriteToOutputPin	16	static
 ../drivers/Src/stm32l452xx_gpio_driver.c:250:6:GPIO_WriteToOutputPort	16	static
 ../drivers/Src/stm32l452xx_gpio_driver.c:255:6:GPIO_ToggleOutputPin	16	static
+../drivers/Src/stm32l452xx_gpio_driver.c:265:6:GPIO_IRQConfig	16	static
