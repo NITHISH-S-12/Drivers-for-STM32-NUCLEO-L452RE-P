@@ -299,5 +299,12 @@ void GPIO_IRQInterrruptConfig(uint8_t IRQNumber, uint8_t IRQPriority, uint8_t En
 
 	}
 }
-//void GPIO_IRQHandling(uint8_t PinNumber);/*IRQ handling means whenever the interrupt triggers the user application, then the user application call this IRQ handling function t
-
+//
+void GPIO_IRQHandling(uint8_t PinNumber)//IRQ handling means whenever the interrupt triggers the user application, then the user application call this IRQ handling function t
+{
+	//Clear the EXTI PR register corresponding to pin number
+	if(EXTI->EXTI_PR1 & (1 << PinNUmber))
+	{
+		EXTI->EXTI_PR1 |= (1<< PinNumber);
+	}
+}
