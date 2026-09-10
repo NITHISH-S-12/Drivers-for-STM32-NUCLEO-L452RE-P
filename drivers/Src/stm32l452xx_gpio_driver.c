@@ -262,7 +262,7 @@ void GPIO_ToggleOutputPin(GPIO_RegDef_t *pGPIOx, uint8_t PinNumber)/*To toggle t
  * IRQ Configuration and ISR handling
 */
 /*Configure the IRQ number of GPIO pin(enabling and setup the interrupt number)*/
-void GPIO_IRQInterrruptConfig(uint8_t IRQNumber, uint8_t IRQPriority, uint8_t EnorDi)
+void GPIO_IRQInterrruptConfig(uint8_t IRQNumber, uint8_t EnorDi)
 {
 	if(EnorDi == ENABLE)
 	{
@@ -299,12 +299,26 @@ void GPIO_IRQInterrruptConfig(uint8_t IRQNumber, uint8_t IRQPriority, uint8_t En
 
 	}
 }
+
 //
 void GPIO_IRQHandling(uint8_t PinNumber)//IRQ handling means whenever the interrupt triggers the user application, then the user application call this IRQ handling function t
 {
 	//Clear the EXTI PR register corresponding to pin number
-	if(EXTI->EXTI_PR1 & (1 << PinNUmber))
+	if(EXTI->EXTI_PR1 & (1 << PinNumber))
 	{
 		EXTI->EXTI_PR1 |= (1<< PinNumber);
 	}
 }
+
+
+
+void GPIO_IRQPriorityConfig(uint8_t IRQNumber, uint8_t IRQPriority	)
+{
+	//First findout the correct IPR register for setting the priority for given IRQ number
+	uint8_t iprx = IRQNumber / 4;
+	uint8_t iprx_section = IRQNumber % 4;
+	uint8_t shift_amount = (8 * iprx_section) + (8 - NO_PR_BITS_IMPLEMENTED);
+	*(NVIC_PR_BASE_ADDR + (4*iprx)) |= (IRQPriority << shift_amount);
+}
+//void GPIO_IRQHandling(uint8_t PinNumber);/*IRQ handling means whenever the interrupt triggers the user application, then the user application call this IRQ handling function t
+
