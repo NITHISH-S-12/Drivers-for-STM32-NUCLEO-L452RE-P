@@ -88,14 +88,14 @@ typedef struct
 /*
  *@CPOL
  */
-#define SPI_CPOL_HIGH	0
-#define SPI_CPOL_LOW	1
+#define SPI_CPOL_LOW	0
+#define SPI_CPOL_HIGH	1
 
 /*
  * @CPHA
  */
-#define SPI_CPHA_HIGH	0
-#define SPI_CPHA_LOW	1
+#define SPI_CPHA_LOW	0
+#define SPI_CPHA_HIGH	1
 
 /*
  * @SPI_SSM
@@ -129,3 +129,15 @@ void SPI_DeInit(SPI_RegDef_t *pSPIx);
  */
 void SPI_SendData(SPI_RegDef_t *pSPIx, uint8_t *pTxBuffer, uint32_t Len);
 void SPI_ReceiveData(SPI_RegDef_t *pSPIx, uint8_t *pRxBuffer, uint32_t Len);
+
+
+
+/*
+ *  Enable or Disable SPI Peripheral
+ */
+void SPI_PeripheralControl(SPI_RegDef_t *pSPIx , uint8_t EnOrDi);
+
+/*
+ *  Enable or Disable SSI bit in the SPI control Register.
+ */
+void SPI_PeripheralControl(SPI_RegDef_t *pSPIx , uint8_t EnOrDi);
