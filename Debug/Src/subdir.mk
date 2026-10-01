@@ -5,29 +5,29 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
-../Src/005_button_interrupt_led_toggle.c \
+../Src/007_spi_txonly_form_stm32_to_arduino.c \
 ../Src/syscalls.c \
 ../Src/sysmem.c 
 
 OBJS += \
-./Src/005_button_interrupt_led_toggle.o \
+./Src/007_spi_txonly_form_stm32_to_arduino.o \
 ./Src/syscalls.o \
 ./Src/sysmem.o 
 
 C_DEPS += \
-./Src/005_button_interrupt_led_toggle.d \
+./Src/007_spi_txonly_form_stm32_to_arduino.d \
 ./Src/syscalls.d \
 ./Src/sysmem.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
 Src/%.o Src/%.su Src/%.cyclo: ../Src/%.c Src/subdir.mk
-	arm-none-eabi-gcc "$<" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DNUCLEO_L452RE_P -DSTM32L452RETxP -DSTM32L4 -DSTM32 -c -I../Inc -I"/home/ubuntu/stm32l452re-p/Drivers-for-STM32-NUCLEO-L452RE-P/drivers/Inc" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@"
+	arm-none-eabi-gcc "$<" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DNUCLEO_L452RE_P -DSTM32L452RETxP -DSTM32L4 -DSTM32 -c -I../Inc -I"/home/cdac/STM32CubeIDE/stm32l452re-p/stm32l4xx_drivers/drivers/Inc" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@"
 
 clean: clean-Src
 
 clean-Src:
-	-$(RM) ./Src/005_button_interrupt_led_toggle.cyclo ./Src/005_button_interrupt_led_toggle.d ./Src/005_button_interrupt_led_toggle.o ./Src/005_button_interrupt_led_toggle.su ./Src/syscalls.cyclo ./Src/syscalls.d ./Src/syscalls.o ./Src/syscalls.su ./Src/sysmem.cyclo ./Src/sysmem.d ./Src/sysmem.o ./Src/sysmem.su
+	-$(RM) ./Src/007_spi_txonly_form_stm32_to_arduino.cyclo ./Src/007_spi_txonly_form_stm32_to_arduino.d ./Src/007_spi_txonly_form_stm32_to_arduino.o ./Src/007_spi_txonly_form_stm32_to_arduino.su ./Src/syscalls.cyclo ./Src/syscalls.d ./Src/syscalls.o ./Src/syscalls.su ./Src/sysmem.cyclo ./Src/sysmem.d ./Src/sysmem.o ./Src/sysmem.su
 
 .PHONY: clean-Src
 

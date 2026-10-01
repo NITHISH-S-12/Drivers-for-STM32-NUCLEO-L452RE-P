@@ -53,8 +53,6 @@ int main (void)
     	  GPIO_ToggleOutputPin(GPIOB, GPIO_PIN_NO_13);
     	}
 
-
-
     }
     return 0;
 

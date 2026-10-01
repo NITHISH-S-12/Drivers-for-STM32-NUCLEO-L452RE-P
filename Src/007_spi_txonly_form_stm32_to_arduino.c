@@ -15,6 +15,8 @@
 
 #include<string.h>
 #include<stm32l452xx.h>
+#include<stm32l452xx_gpio_driver.h>
+#include<stm32l452xx_spi_driver.h>
 
 /*
 PB 14  ==> SPI2_MISO
@@ -33,7 +35,7 @@ void SPI2_GPIOInits(void)
 	SPIPins.GPIO_PinConfig.GPIO_PinAltFunMode = 5;
 	SPIPins.GPIO_PinConfig.GPIO_PinOPType = GPIO_OP_TYPE_PP;
 	SPIPins.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_NO_PUPD;
-	SPIPins.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_FAST;
+	SPIPins.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_HIGH;
 
     //SCLK
 	SPIPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_NO_13;
@@ -71,9 +73,48 @@ void SPI2_Inits(void)
 }
 
 
+void GPIO_ButtonInit(void)
+{
+	    GPIO_Handle_t GpioBtn;
+	    //Button Gpio Configuration
+		GpioBtn.pGPIOx = GPIOC;
+		GpioBtn.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_NO_13;
+		GpioBtn.GPIO_PinConfig.GPIO_PinMode  = GPIO_MODE_IN;
+		GpioBtn.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_HIGH;
+	    GpioBtn.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_NO_PUPD;
+
+	    //GPIO_PeriClockControl(GPIOC, ENABLE); (no need to enable the clock because we have enable the peripheral clock in GPIO_Init
+	    GPIO_Init(&GpioBtn);
+
+}
+
+void delay(void)
+{
+	//for(volatile uint32_t i=0; i < 500000; i++);
+
+	   for(volatile uint32_t i=0; i < 500000/4	; i++)
+	    {
+	        //i++;// empty
+	    }
+}
+
+
 int main(void)
 {
+	while(1)
+	{
 	char user_data[] = "Hello World";
+	//Init the Button configuration
+
+	//Init the Button
+	GPIO_ButtonInit();
+
+	//wait till button is pressed
+	while(!GPIO_ReadFromInputPin(GPIOC,GPIO_PIN_NO_13))
+
+	//To avoid button de-bouncing related isssues
+	 delay();
+
 	//This function is used to initialize the GPIO pins to behave as SPI2 pins
 	SPI2_GPIOInits();
 
@@ -90,6 +131,19 @@ int main(void)
 	//Enable the SPI peripheral
 	SPI_PeripheralControl(SPI2, ENABLE);
 
+	//First we sent the data length information and then data
+	uint8_t dataLen = strlen(user_data);
+	SPI_SendData(SPI2, &dataLen, 1);
+
+	//Send data
 	SPI_SendData(SPI2, user_data, strlen(user_data));
+
+	//Confirm whether SPI is not busy
+	while( SPI_GetFlagStatus(SPI2,SPI_BUSY_FLAG))
+
+	//Enable the SPI peripheral
+	SPI_PeripheralControl(SPI2, DISABLE);
+	}
+
 	return 0;
 }

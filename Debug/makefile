@@ -34,34 +34,34 @@ $(wildcard ../makefile.init) \
 $(wildcard ../makefile.targets) \
 
 
-BUILD_ARTIFACT_NAME := Drivers-for-STM32-NUCLEO-L452RE-P
+BUILD_ARTIFACT_NAME := stm32l4xx_drivers
 BUILD_ARTIFACT_EXTENSION := elf
 BUILD_ARTIFACT_PREFIX :=
 BUILD_ARTIFACT := $(BUILD_ARTIFACT_PREFIX)$(BUILD_ARTIFACT_NAME)$(if $(BUILD_ARTIFACT_EXTENSION),.$(BUILD_ARTIFACT_EXTENSION),)
 
 # Add inputs and outputs from these tool invocations to the build variables 
 EXECUTABLES += \
-Drivers-for-STM32-NUCLEO-L452RE-P.elf \
+stm32l4xx_drivers.elf \
 
 MAP_FILES += \
-Drivers-for-STM32-NUCLEO-L452RE-P.map \
+stm32l4xx_drivers.map \
 
 SIZE_OUTPUT += \
 default.size.stdout \
 
 OBJDUMP_LIST += \
-Drivers-for-STM32-NUCLEO-L452RE-P.list \
+stm32l4xx_drivers.list \
 
 
 # All Target
 all: main-build
 
 # Main-build Target
-main-build: Drivers-for-STM32-NUCLEO-L452RE-P.elf secondary-outputs
+main-build: stm32l4xx_drivers.elf secondary-outputs
 
 # Tool invocations
-Drivers-for-STM32-NUCLEO-L452RE-P.elf Drivers-for-STM32-NUCLEO-L452RE-P.map: $(OBJS) $(USER_OBJS) /home/ubuntu/stm32l452re-p/Drivers-for-STM32-NUCLEO-L452RE-P/STM32L452RETXP_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "Drivers-for-STM32-NUCLEO-L452RE-P.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/ubuntu/stm32l452re-p/Drivers-for-STM32-NUCLEO-L452RE-P/STM32L452RETXP_FLASH.ld" --specs=nosys.specs -Wl,-Map="Drivers-for-STM32-NUCLEO-L452RE-P.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+stm32l4xx_drivers.elf stm32l4xx_drivers.map: $(OBJS) $(USER_OBJS) /home/cdac/STM32CubeIDE/stm32l452re-p/stm32l4xx_drivers/STM32L452RETXP_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "stm32l4xx_drivers.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/cdac/STM32CubeIDE/stm32l452re-p/stm32l4xx_drivers/STM32L452RETXP_FLASH.ld" --specs=nosys.specs -Wl,-Map="stm32l4xx_drivers.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -70,14 +70,14 @@ default.size.stdout: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	@echo 'Finished building: $@'
 	@echo ' '
 
-Drivers-for-STM32-NUCLEO-L452RE-P.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "Drivers-for-STM32-NUCLEO-L452RE-P.list"
+stm32l4xx_drivers.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "stm32l4xx_drivers.list"
 	@echo 'Finished building: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) Drivers-for-STM32-NUCLEO-L452RE-P.elf Drivers-for-STM32-NUCLEO-L452RE-P.list Drivers-for-STM32-NUCLEO-L452RE-P.map default.size.stdout
+	-$(RM) default.size.stdout stm32l4xx_drivers.elf stm32l4xx_drivers.list stm32l4xx_drivers.map
 	-@echo ' '
 
 secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST)

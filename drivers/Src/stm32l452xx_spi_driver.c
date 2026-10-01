@@ -90,26 +90,26 @@ uint8_t SPI_GetFlagStatus(SPI_RegDef_t *pSPI, uint32_t FlagName)
 	return FLAG_RESET;
 }
 
-void SPI_SendData(SPI_RegDef_t *pSPI, uint8_t *pTxBuffer, uint32_t Len) //Len is number of bytes
+void SPI_SendData(SPI_RegDef_t *pSPIx, uint8_t *pTxBuffer, uint32_t Len) //Len is number of bytes
 {
 	while(Len > 0)
 	{
 		//1. wait until  TXE is set
-		while(SPI_GetFlagStatus(pSPI, SPI_TXE_FLAG) == FLAG_RESET);
+		while(SPI_GetFlagStatus(pSPIx, SPI_TXE_FLAG) == FLAG_RESET);
 
 		//2.Check the DFF bit in CR2 is less than or equal to 8 bits
-		if((pSPI->CR2 & ( 15 << SPI_CR2_DS)) <= 8)
+		if((pSPIx->CR2 & ( 15 << SPI_CR2_DS)) <= 7)
 		{
 			//Equal or less than 8 bit we will fix as 8 bit frame.
 			//load the data in to DR.
-			pSPI->DR = *((uint8_t*)(pTxBuffer));
+			pSPIx->DR = *((uint8_t*)(pTxBuffer));
 			Len--;
 			pTxBuffer++;
 		}
 		else
 		{
 			//more than 8 bits we will fix as 16 bit frame.
-			pSPI->DR = *((uint16_t*)pTxBuffer);
+			pSPIx->DR = *((uint16_t*)pTxBuffer);
 			Len--;
 			Len--;
 			(uint16_t*)pTxBuffer++;
@@ -119,6 +119,38 @@ void SPI_SendData(SPI_RegDef_t *pSPI, uint8_t *pTxBuffer, uint32_t Len) //Len is
 	}
 }
 
+
+
+void SPI_ReceiveData(SPI_RegDef_t *pSPIx, uint8_t *pRxBuffer, uint32_t Len) //Len is number of bytes
+{
+
+	while(Len > 0)
+		{
+			//1. wait until  RXNE is set
+			while(SPI_GetFlagStatus(pSPIx, SPI_RXNE_FLAG) == FLAG_RESET);
+
+			//2.Check the DFF bit in CR2 is less than or equal to 8 bits
+			if((pSPIx->CR2 & ( 15 << SPI_CR2_DS)) <= 7)
+			{
+				//Equal or less than 8 bit we will fix as 8 bit frame.
+				//load the data from  DR to Rxbuffer Address.
+				*(pRxBuffer) = pSPIx->DR;
+				Len--;
+				pRxBuffer++;
+			}
+			else
+			{
+				//more than 8 bits we will fix as 16 bit frame.
+				*((uint16_t*)pRxBuffer) = pSPIx->DR;
+				Len--;
+				Len--;
+				(uint16_t*)pRxBuffer++;
+			}
+
+
+		}
+
+}
 
 /*********************************************************************
  * @fn              - SPI_PeripheralControl
@@ -138,11 +170,11 @@ void SPI_PeripheralControl(SPI_RegDef_t *pSPIx , uint8_t EnOrDi)
 {
 	if(EnOrDi == ENABLE)
 	{
-		pSPI->CR1 |= (1 << SPI_CR1_SPE);
+		pSPIx->CR1 |= (1 << SPI_CR1_SPE);
 	}
 	else
 	{
-		pSPI->CR1 &=  ~(1 << SPI_CR1_SPE);
+		pSPIx->CR1 &=  ~(1 << SPI_CR1_SPE);
 	}
 
 }

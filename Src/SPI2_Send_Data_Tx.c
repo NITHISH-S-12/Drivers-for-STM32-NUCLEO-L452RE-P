@@ -6,7 +6,9 @@
  */
 
 #include<string.h>
-#include<stm32l452xx>
+#include<stm32l452xx.h>
+#include<stm32l452xx_gpio_driver.h>
+#include<stm32l452xx_spi_driver.h>
 
 /*
 PB 14  ==> SPI2_MISO
@@ -25,7 +27,7 @@ void SPI2_GPIOInits(void)
 	SPIPins.GPIO_PinConfig.GPIO_PinAltFunMode = 5;
 	SPIPins.GPIO_PinConfig.GPIO_PinOPType = GPIO_OP_TYPE_PP;
 	SPIPins.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_NO_PUPD;
-	SPIPins.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_FAST;
+	SPIPins.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_HIGH;
 
     //SCLK
 	SPIPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_NO_13;
@@ -54,7 +56,7 @@ void SPI2_Inits(void)
 	SPI2handle.SPIConfig.SPI_BusConfig  = SPI_BUS_CONFIG_FD;
 	SPI2handle.SPIConfig.SPI_DeviceMode = SPI_DEVICE_MODE_MASTER;
 	SPI2handle.SPIConfig.SPI_SclkSpeed = SPI_SCLK_SPEED_DIV2;
-	SPI2handle.SPIConfig.SPI_DFF =SPI_DFF_8BITS;
+	SPI2handle.SPIConfig.SPI_DFF = SPI_DFF_8BITS;
 	SPI2handle.SPIConfig.SPI_CPOL = SPI_CPOL_LOW;
 	SPI2handle.SPIConfig.SPI_CPHA = SPI_CPHA_LOW;
 	SPI2handle.SPIConfig.SPI_SSM = SPI_SSM_EN;//Software slave management enabled for NSS pin
@@ -79,5 +81,11 @@ int main(void)
 	SPI_PeripheralControl(SPI2, ENABLE);
 
 	SPI_SendData(SPI2, user_data, strlen(user_data));
+
+	//Confirm whether SPI is not busy
+    while(SPI_GetFLagStatus(SPI2, SPI_BUSY_FLAG ));
+
+	//Enable the SPI peripheral
+	SPI_PeripheralControl(SPI2, DISABLE);
 	return 0;
 }

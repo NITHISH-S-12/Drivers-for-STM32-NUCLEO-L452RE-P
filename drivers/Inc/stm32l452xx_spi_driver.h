@@ -70,19 +70,19 @@ typedef struct
 /*
  *@SPI_DFF
  */
-#define SPI_DFF_4BITS	4
-#define SPI_DFF_5BITS   5
-#define SPI_DFF_6BITS	6
-#define SPI_DFF_7BITS	7
-#define SPI_DFF_8BITS	8​
-#define SPI_DFF_9BITS	9
-#define SPI_DFF_10BITS	10
-#define SPI_DFF_11BITS	11
-#define SPI_DFF_12BITS	12
-#define SPI_DFF_13BITS	13
-#define SPI_DFF_14BITS	14
-#define SPI_DFF_15BITS	15
-#define SPI_DFF_16BITS	16
+#define SPI_DFF_4BITS	3
+#define SPI_DFF_5BITS   4
+#define SPI_DFF_6BITS	5
+#define SPI_DFF_7BITS	6
+#define SPI_DFF_8BITS 	7
+#define SPI_DFF_9BITS	8
+#define SPI_DFF_10BITS	9
+#define SPI_DFF_11BITS	10
+#define SPI_DFF_12BITS	11
+#define SPI_DFF_13BITS	12
+#define SPI_DFF_14BITS	13
+#define SPI_DFF_15BITS	14
+#define SPI_DFF_16BITS	15
 
 
 /*
@@ -130,7 +130,10 @@ void SPI_DeInit(SPI_RegDef_t *pSPIx);
 void SPI_SendData(SPI_RegDef_t *pSPIx, uint8_t *pTxBuffer, uint32_t Len);
 void SPI_ReceiveData(SPI_RegDef_t *pSPIx, uint8_t *pRxBuffer, uint32_t Len);
 
-
+/*
+ *SPI FLag Status
+ */
+uint8_t SPI_GetFlagStatus(SPI_RegDef_t *pSPI, uint32_t FlagName);
 
 /*
  *  Enable or Disable SPI Peripheral
