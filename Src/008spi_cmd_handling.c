@@ -1,8 +1,8 @@
 /*
- * 007_spi_txonly_form_stm32_to_arduino.c
+ * 008spi_cmd_handling.c
  *
- *  Created on: Sep 29, 2026
- *      Author: ubuntu
+ *  Created on: Oct 5, 2026
+ *      Author: cdac
  */
 
 
@@ -18,28 +18,6 @@
 #include<stm32l452xx.h>
 #include<stm32l452xx_gpio_driver.h>
 #include<stm32l452xx_spi_driver.h>
-
-
-
-//Command Codes
-#define COMMAND_LED_CTRL		0x50
-#define COMMAND_SENSOR_READ		0x51
-#define COMMAND_LED_READ		0x52
-#define COMMAND_PRINT			0x53
-#define COMMAND_ID_READ			0x54
-
-#define LED_ON		1
-#define LED_OFF 	0
-
-//Arduino analog pin
-#define ANALOG_PIN0	0
-#define ANALOG_PIN1 1
-#define ANALOG_PIN1 2
-#define ANALOG_PIN1 3
-#define ANALOG_PIN1 4
-
-//Arduino Led
-#define LED_PIN		9
 
 /*
 PB 14  ==> SPI2_MISO
@@ -124,19 +102,9 @@ void delay(void)
 
 int main(void)
 {
-	while(1)
-	{
-	char user_data[] = "Hello World";
-	//Init the Button configuration
 
 	//Init the Button
 	GPIO_ButtonInit();
-
-	//wait till button is pressed
-	while(!GPIO_ReadFromInputPin(GPIOC,GPIO_PIN_NO_13))
-
-	//To avoid button de-bouncing related isssues
-	 delay();
 
 	//This function is used to initialize the GPIO pins to behave as SPI2 pins
 	SPI2_GPIOInits();
@@ -151,26 +119,33 @@ int main(void)
 	*/
 	SPI_SSOEConfig(SPI2, ENABLE);
 
-	//Enable the SPI peripheral
+	while(1)
+	{
+	//wait till button is pressed
+	while(!GPIO_ReadFromInputPin(GPIOC,GPIO_PIN_NO_13))
+
+	//To avoid button de-bouncing related isssues
+	 delay();
+
+	//Enable the SPI2 Peripheral
 	SPI_PeripheralControl(SPI2, ENABLE);
 
-	//First we sent the data length information and then data
-	uint8_t dataLen = strlen(user_data);
-	SPI_SendData(SPI2, &dataLen, 1);
-
-	//Send data
-	SPI_SendData(SPI2, user_data, strlen(user_data));
 
 	//Confirm whether SPI is not busy
 	while( SPI_GetFlagStatus(SPI2,SPI_BUSY_FLAG))
 
 	//Enable the SPI peripheral
 	SPI_PeripheralControl(SPI2, DISABLE);
-	}
+
+
+
+
+	//Send data
+	SPI_SendData(SPI2, user_data, strlen(user_data));
+
+
+
 
 	return 0;
 }
-
-
-
 
