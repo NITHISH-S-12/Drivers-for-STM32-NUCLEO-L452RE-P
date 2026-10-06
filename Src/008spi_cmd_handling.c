@@ -103,6 +103,7 @@ void delay(void)
 int main(void)
 {
 
+	uint8_t dummy_byte = 0xFF;
 	//Init the Button
 	GPIO_ButtonInit();
 
@@ -130,19 +131,22 @@ int main(void)
 	//Enable the SPI2 Peripheral
 	SPI_PeripheralControl(SPI2, ENABLE);
 
+	//1.CMD_LED_CTRL  <pin no(1)>  <value(1)>
+	uint8_t  commndcode = COMMAND_LED_CTRL;
+	SPI_SendData(SPI2, &commndcode, 1);
+
+	//Send some dummy bits(1 byte) to fetch the response from slave.
+	SPI_SendData(SPI2, &dummy_byte, 1);
 
 	//Confirm whether SPI is not busy
-	while( SPI_GetFlagStatus(SPI2,SPI_BUSY_FLAG))
+	while( SPI_GetFlagStatus(SPI2,SPI_BUSY_FLAG));
+
 
 	//Enable the SPI peripheral
 	SPI_PeripheralControl(SPI2, DISABLE);
 
 
-
-
-	//Send data
-	SPI_SendData(SPI2, user_data, strlen(user_data));
-
+	}
 
 
 

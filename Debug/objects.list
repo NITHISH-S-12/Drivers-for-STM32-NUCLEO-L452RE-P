@@ -1,4 +1,5 @@
 "./Src/007_spi_txonly_form_stm32_to_arduino.o"
+"./Src/008spi_cmd_handling.o"
 "./Src/syscalls.o"
 "./Src/sysmem.o"
 "./Startup/startup_stm32l452retxp.o"
