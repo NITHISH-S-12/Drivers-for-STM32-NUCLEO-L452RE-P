@@ -42,8 +42,8 @@ void SPI2_GPIOInits(void)
 	//GPIO_Init(&SPIPins);
 
 	//NSS
-	//SPIPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_NO_12;
-	//GPIO_Init(&SPIPins);
+	SPIPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_NO_12;
+	GPIO_Init(&SPIPins);
 
 
 
@@ -55,16 +55,16 @@ void SPI2_Inits(void)
 	SPI2handle.pSPIx =  SPI2;
 	SPI2handle.SPIConfig.SPI_BusConfig  = SPI_BUS_CONFIG_FD;
 	SPI2handle.SPIConfig.SPI_DeviceMode = SPI_DEVICE_MODE_MASTER;
-	SPI2handle.SPIConfig.SPI_SclkSpeed = SPI_SCLK_SPEED_DIV2;
+	SPI2handle.SPIConfig.SPI_SclkSpeed = SPI_SCLK_SPEED_DIV8;
 	SPI2handle.SPIConfig.SPI_DFF = SPI_DFF_8BITS;
 	SPI2handle.SPIConfig.SPI_CPOL = SPI_CPOL_LOW;
 	SPI2handle.SPIConfig.SPI_CPHA = SPI_CPHA_LOW;
-	SPI2handle.SPIConfig.SPI_SSM = SPI_SSM_EN;//Software slave management enabled for NSS pin
+	SPI2handle.SPIConfig.SPI_SSM = SPI_SSM_DI;//Software slave management enabled for NSS pin
 
 	SPI_Init(&SPI2handle);
 }
 
-
+/*
 int main(void)
 {
 	char user_data[] = "Hello World";
@@ -77,15 +77,42 @@ int main(void)
 	//This makes NSS signal internally high and avoids MODF error
 	SPI_SSIConfig(SPI2 , ENABLE);
 
+
 	//Enable the SPI peripheral
 	SPI_PeripheralControl(SPI2, ENABLE);
 
-	SPI_SendData(SPI2, user_data, strlen(user_data));
+
+	SPI_SendData(SPI2, (uint8_t *)user_data, strlen(user_data));
 
 	//Confirm whether SPI is not busy
-    while(SPI_GetFLagStatus(SPI2, SPI_BUSY_FLAG ));
+    while(SPI_GetFLagStatus(SPI2, SPI_BUSY_FLAG));
 
 	//Enable the SPI peripheral
 	SPI_PeripheralControl(SPI2, DISABLE);
 	return 0;
+}
+*/
+int main(void)
+{
+	char user_data[] = "Hello World";
+	uint8_t dataLen = strlen(user_data);
+
+	SPI2_GPIOInits();
+	SPI2_Inits();
+
+	SPI_SSOEConfig(SPI2, ENABLE);      // NSS goes low automatically when SPE=1
+
+	SPI_PeripheralControl(SPI2, ENABLE);
+
+	// length byte first, then the payload
+	SPI_SendData(SPI2, &dataLen, 1);
+	SPI_SendData(SPI2, (uint8_t *)user_data, dataLen);
+
+	// wait for the last byte to be fully shifted out
+	while(SPI_GetFlagStatus(SPI2, SPI_TXE_FLAG) == FLAG_RESET);
+	while(SPI_GetFlagStatus(SPI2, SPI_BUSY_FLAG) == FLAG_SET);
+
+	SPI_PeripheralControl(SPI2, DISABLE);   // NSS goes high again
+
+	while(1);
 }

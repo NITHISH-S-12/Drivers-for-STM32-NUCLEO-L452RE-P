@@ -71,11 +71,11 @@
 							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.symbolsrec.1002742378" name="MCU Output Converter Motorola S-rec with symbols" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.symbolsrec"/>
 						</toolChain>
 					</folderInfo>
-					<fileInfo id="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.951285151.742523219" name="007_spi_txonly_form_stm32_to_arduino.c" rcbsApplicability="disable" resourcePath="Src/007_spi_txonly_form_stm32_to_arduino.c" toolsToInvoke="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.517001872.1904542025">
-						<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.517001872.1904542025" name="MCU/MPU GCC Compiler" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.517001872"/>
+					<fileInfo id="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.951285151.1008583289" name="008spi_cmd_handling.c" rcbsApplicability="disable" resourcePath="Src/008spi_cmd_handling.c" toolsToInvoke="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.517001872.1446492557">
+						<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.517001872.1446492557" name="MCU/MPU GCC Compiler" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.517001872"/>
 					</fileInfo>
 					<sourceEntries>
-						<entry excluding="SPI2_Send_Data_Tx.c|005_button_interrupt_led_toggle.c|003led_button_ext.c|001led_toggle.c|002led_button.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Src"/>
+						<entry excluding="008spi_cmd_handling.c|SPI2_Send_Data_Tx.c|005_button_interrupt_led_toggle.c|003led_button_ext.c|001led_toggle.c|002led_button.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Src"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Startup"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="drivers"/>
 					</sourceEntries>
@@ -163,15 +163,6 @@
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
-	<storageModule moduleId="scannerConfiguration">
-		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		<scannerConfigBuildInfo instanceId="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.release.1282460155;com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.release.1282460155.;com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.2132153251;com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.188164927">
-			<autodiscovery enabled="false" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.951285151;com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.951285151.;com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.517001872;com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.1631898166">
-			<autodiscovery enabled="false" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-	</storageModule>
 	<storageModule moduleId="refreshScope" versionNumber="2">
 		<configuration configurationName="Debug">
 			<resource resourceType="PROJECT" workspacePath="/stm32l4xx_drivers"/>
@@ -180,4 +171,5 @@
 			<resource resourceType="PROJECT" workspacePath="/stm32l4xx_drivers"/>
 		</configuration>
 	</storageModule>
+	<storageModule moduleId="scannerConfiguration"/>
 </cproject>

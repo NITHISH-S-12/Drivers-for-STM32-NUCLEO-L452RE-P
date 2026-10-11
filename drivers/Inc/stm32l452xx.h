@@ -311,7 +311,7 @@ typedef struct
 	__vo uint32_t CR1;
 	__vo uint32_t CR2;
 	__vo uint32_t SR;
-	__vo uint32_t DR;
+	__vo uint16_t DR;
 	__vo uint32_t CRCPR;
 	__vo uint32_t RXCRCR;
 	__vo uint32_t TXCRCR;

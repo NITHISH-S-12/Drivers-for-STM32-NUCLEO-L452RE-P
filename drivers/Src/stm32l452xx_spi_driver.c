@@ -5,7 +5,6 @@
  *      Author: cdac
  */
 
-
 #include "stm32l452xx_spi_driver.h"
 
 
@@ -63,7 +62,8 @@ void SPI_Init(SPI_Handle_t *pSPIHandle)
 	temp_reg |= pSPIHandle->SPIConfig.SPI_SclkSpeed << SPI_CR1_BR;
 
 	//4. Configure the Data frame
-	temp_reg |= pSPIHandle->SPIConfig.SPI_DFF << SPI_CR2_DS;
+	uint32_t temp_reg2 = 0;
+	temp_reg2 |= pSPIHandle->SPIConfig.SPI_DFF << SPI_CR2_DS;
 
 	//5.Configure the CPOL
 	temp_reg |= pSPIHandle->SPIConfig.SPI_CPOL << SPI_CR1_CPOL ;
@@ -73,6 +73,9 @@ void SPI_Init(SPI_Handle_t *pSPIHandle)
 
 	//Assign the temp_reg value to the CR1 register of SPI
 	pSPIHandle->pSPIx->CR1 = temp_reg;
+
+	//Assign the temp_reg2 value to the CR2 register of SPI
+	pSPIHandle->pSPIx->CR2 = temp_reg2;
 }
 
 /*void SPI_DeInit()
@@ -90,7 +93,10 @@ uint8_t SPI_GetFlagStatus(SPI_RegDef_t *pSPI, uint32_t FlagName)
 	return FLAG_RESET;
 }
 
-void SPI_SendData(SPI_RegDef_t *pSPIx, uint8_t *pTxBuffer, uint32_t Len) //Len is number of bytes
+
+
+
+void SPI_SendData(SPI_RegDef_t *pSPIx, uint8_t *pTxBuffer, uint32_t Len)
 {
 	while(Len > 0)
 	{
@@ -98,27 +104,47 @@ void SPI_SendData(SPI_RegDef_t *pSPIx, uint8_t *pTxBuffer, uint32_t Len) //Len i
 		while(SPI_GetFlagStatus(pSPIx, SPI_TXE_FLAG) == FLAG_RESET);
 
 		//2.Check the DFF bit in CR2 is less than or equal to 8 bits
-		if((pSPIx->CR2 & ( 15 << SPI_CR2_DS)) <= 7)
+		if(((pSPIx->CR2 >> SPI_CR2_DS) & 0x0F) <= 7)
 		{
 			//Equal or less than 8 bit we will fix as 8 bit frame.
 			//load the data in to DR.
-			pSPIx->DR = *((uint8_t*)(pTxBuffer));
+			 *((__vo uint8_t *)&pSPIx->DR) = *pTxBuffer;
+
+			 /*    HOW DOES IT WORK?
+			 *
+			 *    Step 1: &pSPIx->DR
+			 *            Gets the ADDRESS of the SPI data register.
+			 *
+			 *    Step 2: (__vo uint8_t *)&pSPIx->DR
+			 *            Treats that address as a pointer to an 8-bit
+			 *            volatile object.
+			 *
+			 *    Step 3: *((__vo uint8_t *)&pSPIx->DR)
+			 *            The * dereferences the pointer.
+			 *            It refers to the actual register memory location,
+			 *            so we can write a value to it.
+			 *
+			 *    Step 4: *pTxBuffer
+			 *            Reads one byte from the transmit buffer.
+			 *
+			 *    Step 5: Assignment (=)
+			 *            Writes that byte to the SPI data register
+			 *            using an 8-bit access.*/
+			 /*Since in the stm32 nucleo l452re-p data register is 16bit value.We are convert the address of data register as pointer of 16bit value to 8bit value
+			  * so if we read that data register then first 8 bit only we can fetch
+			  */
 			Len--;
 			pTxBuffer++;
 		}
 		else
 		{
 			//more than 8 bits we will fix as 16 bit frame.
-			pSPIx->DR = *((uint16_t*)pTxBuffer);
-			Len--;
-			Len--;
-			(uint16_t*)pTxBuffer++;
+			*((__vo uint16_t*)&pSPIx->DR) = *((uint16_t*)pTxBuffer);
+			Len -= 2;
+			pTxBuffer += 2;
 		}
-
-
 	}
 }
-
 
 
 void SPI_ReceiveData(SPI_RegDef_t *pSPIx, uint8_t *pRxBuffer, uint32_t Len) //Len is number of bytes

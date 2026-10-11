@@ -34,9 +34,9 @@
 //Arduino analog pin
 #define ANALOG_PIN0	0
 #define ANALOG_PIN1 1
-#define ANALOG_PIN1 2
-#define ANALOG_PIN1 3
-#define ANALOG_PIN1 4
+#define ANALOG_PIN2 2
+#define ANALOG_PIN3 3
+#define ANALOG_PIN4 4
 
 //Arduino Led
 #define LED_PIN		9
@@ -133,7 +133,7 @@ int main(void)
 	GPIO_ButtonInit();
 
 	//wait till button is pressed
-	while(!GPIO_ReadFromInputPin(GPIOC,GPIO_PIN_NO_13))
+	while(!GPIO_ReadFromInputPin(GPIOC,GPIO_PIN_NO_13));
 
 	//To avoid button de-bouncing related isssues
 	 delay();
@@ -162,7 +162,7 @@ int main(void)
 	SPI_SendData(SPI2, user_data, strlen(user_data));
 
 	//Confirm whether SPI is not busy
-	while( SPI_GetFlagStatus(SPI2,SPI_BUSY_FLAG))
+	while( SPI_GetFlagStatus(SPI2,SPI_BUSY_FLAG));
 
 	//Enable the SPI peripheral
 	SPI_PeripheralControl(SPI2, DISABLE);
@@ -170,7 +170,3 @@ int main(void)
 
 	return 0;
 }
-
-
-
-
