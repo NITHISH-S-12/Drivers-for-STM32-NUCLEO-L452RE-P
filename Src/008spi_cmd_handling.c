@@ -208,17 +208,24 @@ int main(void)
 		args[0] = ANALOG_PIN0	;
 
 		//Send arguments
-		SPI_SendData(SPI2, &args, 2	)
+		SPI_SendData(SPI2, &args, 2	);
+
+		//do dummy read to  clear off the RXNE
+		SPI_ReceiveData(SPI2, &dummy_read, 1);
+
+
+		//Insert some delay so that slave can ready with the data
+		delay();
+
+
+		//Send some dummy bits(1 byte) to fetch the response from slave.
+		SPI_SendData(SPI2, &dummy_write, 1);
+
+		uint8_t analog_read;
+		SPI_ReceiveData(SPI2, &analog_read, 1);//To fetch the analog value
 	}
 
-	//do dummy read to  clear off the RXNE
-	SPI_ReceiveData(SPI2, &dummy_read, 1);
 
-	//Send some dummy bits(1 byte) to fetch the response from slave.
-	SPI_SendData(SPI2, &dummy_write, 1);
-
-	uint8_t analog_read;
-	SPI_ReceiveData(SPI2, &analog_read, 1);//To fetch the analog value
 
 	//Confirm whether SPI is not busy
 	while(SPI_GetFlagStatus(SPI2,SPI_BUSY_FLAG));
