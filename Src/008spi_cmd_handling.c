@@ -1,245 +1,455 @@
 /*
- * 008spi_cmd_handling.c
+ * STM32L452RE SPI2 Master <----> Arduino UNO SPI Slave
  *
- *  Created on: Oct 5, 2026
- *      Author: cdac
+ * PB13 = SCK
+ * PB14 = MISO
+ * PB15 = MOSI
+ * PB12 = NSS
+ *
+ * PC13 = Nucleo User Button (active HIGH)
+ *
+ * NSS remains LOW for all five commands in one session.
  */
 
+#include <stdint.h>
+#include <string.h>
 
+#include "stm32l452xx.h"
+#include "stm32l452xx_gpio_driver.h"
+#include "stm32l452xx_spi_driver.h"
+
+
+// ==========================================
+// COMMAND DEFINITIONS
+// ==========================================
+
+#define COMMAND_LED_CTRL       0x50
+#define COMMAND_SENSOR_READ    0x51
+#define COMMAND_LED_READ       0x52
+#define COMMAND_PRINT          0x53
+#define COMMAND_ID_READ        0x54
+
+#define ACK                    0xF5
+
+#define LED_ON                 1
+
+#define LED_PIN                9
+
+#define ANALOG_PIN0            0
+
+
+// ==========================================
+// DELAY FUNCTION
+// ==========================================
+
+static void delay(void)
+{
+    for (volatile uint32_t i = 0; i < 250000U; i++)
+    {
+    }
+}
+
+
+// ==========================================
+// BUTTON CHECK
+// ==========================================
+
+static uint8_t buttonIsPressed(void)
+{
+    return GPIO_ReadFromInputPin(GPIOC, GPIO_PIN_NO_13);
+}
+
+
+// ==========================================
+// WAIT FOR BUTTON PRESS AND RELEASE
+// ==========================================
+
+static void waitForButtonPressRelease(void)
+{
+    // Wait until button is pressed.
+    while (buttonIsPressed() == 0U)
+    {
+    }
+
+    // Short debounce delay.
+    for (volatile uint32_t i = 0; i < 10000U; i++)
+    {
+    }
+
+    // Confirm button is still pressed.
+    if (buttonIsPressed() == 0U)
+    {
+        waitForButtonPressRelease();
+        return;
+    }
+
+    // Wait until button is released.
+    while (buttonIsPressed() != 0U)
+    {
+    }
+
+    // Short release debounce.
+    for (volatile uint32_t i = 0; i < 10000U; i++)
+    {
+    }
+}
+
+// ==========================================
+// SPI GPIO INITIALIZATION
+// ==========================================
+
+static void SPI2_GPIOInits(void)
+{
+    GPIO_Handle_t SPIPins;
+
+    SPIPins.pGPIOx = GPIOB;
+
+    SPIPins.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_ALTFN;
+
+    SPIPins.GPIO_PinConfig.GPIO_PinAltFunMode = 5;
+
+    SPIPins.GPIO_PinConfig.GPIO_PinOPType = GPIO_OP_TYPE_PP;
+
+    SPIPins.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_NO_PUPD;
+
+    SPIPins.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_HIGH;
+
+
+    // PB13 = SPI2 SCK
+    SPIPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_NO_13;
+
+    GPIO_Init(&SPIPins);
+
+
+    // PB15 = SPI2 MOSI
+    SPIPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_NO_15;
+
+    GPIO_Init(&SPIPins);
+
+
+    // PB14 = SPI2 MISO
+    SPIPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_NO_14;
+
+    GPIO_Init(&SPIPins);
+
+
+    // PB12 = SPI2 NSS
+    SPIPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_NO_12;
+
+    GPIO_Init(&SPIPins);
+}
+
+
+// ==========================================
+// SPI2 PERIPHERAL INITIALIZATION
+// ==========================================
+
+static void SPI2_Inits(void)
+{
+    SPI_Handle_t SPI2handle;
+
+    SPI2handle.pSPIx = SPI2;
+
+
+    SPI2handle.SPIConfig.SPI_BusConfig = SPI_BUS_CONFIG_FD;
+
+    SPI2handle.SPIConfig.SPI_DeviceMode = SPI_DEVICE_MODE_MASTER;
+
+
+    // SPI Clock = PCLK1 / 32
+    SPI2handle.SPIConfig.SPI_SclkSpeed = SPI_SCLK_SPEED_DIV32;
+
+
+    SPI2handle.SPIConfig.SPI_DFF = SPI_DFF_8BITS;
+
+    SPI2handle.SPIConfig.SPI_CPOL = SPI_CPOL_LOW;
+
+    SPI2handle.SPIConfig.SPI_CPHA = SPI_CPHA_LOW;
+
+    // Hardware NSS.
+    SPI2handle.SPIConfig.SPI_SSM = SPI_SSM_DI;
+
+
+    SPI_Init(&SPI2handle);
+}
+
+
+// ==========================================
+// BUTTON GPIO INITIALIZATION
+// ==========================================
+
+static void GPIO_ButtonInit(void)
+{
+    GPIO_Handle_t GpioBtn;
+
+    GpioBtn.pGPIOx = GPIOC;
+
+    GpioBtn.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_NO_13;
+
+    GpioBtn.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_IN;
+
+    GpioBtn.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_HIGH;
+
+    GpioBtn.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_NO_PUPD;
+
+
+    GPIO_Init(&GpioBtn);
+}
+
+
+// ==========================================
+// VERIFY ACK
+// ==========================================
+
+static uint8_t SPI_VerifyResponse(uint8_t ackbyte)
+{
+    return (ackbyte == ACK) ? 1U : 0U;
+}
+
+
+// ==========================================
+// SPI TRANSFER FUNCTION
+// ==========================================
 
 /*
- * SPI2_Send_Data_Tx.c
+ * SPI is full duplex.
  *
- *  Created on: Sep 26, 2026
- *      Author: ubuntu
+ * Whenever STM32 sends one byte,
+ * it also receives one byte.
+ *
+ * This function sends one byte and
+ * reads the simultaneously received byte.
  */
 
-#include<string.h>
-#include<stm32l452xx.h>
-#include<stm32l452xx_gpio_driver.h>
-#include<stm32l452xx_spi_driver.h>
-
-
-
-#define LED_PIN 9
-
-/*
-PB 14  ==> SPI2_MISO
-PB 15  ==> SPI2_MOSI
-PB 13  ==> SPI2_SCLK
-PB 12  ==> SPI2_NSS
-ALT Function mode is 5
-*/
-
-void SPI2_GPIOInits(void)
+static uint8_t SPI2_TransferByte(uint8_t data)
 {
-	GPIO_Handle_t SPIPins;
+    uint8_t received = 0U;
 
-	SPIPins.pGPIOx = GPIOB;
-	SPIPins.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_ALTFN;
-	SPIPins.GPIO_PinConfig.GPIO_PinAltFunMode = 5;
-	SPIPins.GPIO_PinConfig.GPIO_PinOPType = GPIO_OP_TYPE_PP;
-	SPIPins.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_NO_PUPD;
-	SPIPins.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_HIGH;
+    SPI_SendData(SPI2, &data, 1U);
 
-    //SCLK
-	SPIPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_NO_13;
-	GPIO_Init(&SPIPins);
+    SPI_ReceiveData(SPI2, &received, 1U);
 
-	//MOSI
-	SPIPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_NO_15;
-	GPIO_Init(&SPIPins);
-
-	//MISO
-	SPIPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_NO_14;
-	GPIO_Init(&SPIPins);
-
-	//NSS
-	SPIPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_NO_12;
-	GPIO_Init(&SPIPins);
-
-
-
-}
-
-void SPI2_Inits(void)
-{
-	SPI_Handle_t SPI2handle;
-	SPI2handle.pSPIx =  SPI2;
-	SPI2handle.SPIConfig.SPI_BusConfig  = SPI_BUS_CONFIG_FD;
-	SPI2handle.SPIConfig.SPI_DeviceMode = SPI_DEVICE_MODE_MASTER;
-	SPI2handle.SPIConfig.SPI_SclkSpeed = SPI_SCLK_SPEED_DIV2;//Generate SCLK as 2MHz
-	SPI2handle.SPIConfig.SPI_DFF =SPI_DFF_8BITS;
-	SPI2handle.SPIConfig.SPI_CPOL = SPI_CPOL_LOW;
-	SPI2handle.SPIConfig.SPI_CPHA = SPI_CPHA_LOW;
-	SPI2handle.SPIConfig.SPI_SSM = SPI_SSM_DI;//Hardware slave management enabled for NSS pin
-
-	SPI_Init(&SPI2handle);
+    return received;
 }
 
 
-void GPIO_ButtonInit(void)
+// ==========================================
+// SEND COMMAND AND RECEIVE ACK
+// ==========================================
+
+static uint8_t SPI2_SendCommandAndGetAck(uint8_t command)
 {
-	    GPIO_Handle_t GpioBtn;
-	    //Button Gpio Configuration
-		GpioBtn.pGPIOx = GPIOC;
-		GpioBtn.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_NO_13;
-		GpioBtn.GPIO_PinConfig.GPIO_PinMode  = GPIO_MODE_IN;
-		GpioBtn.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_HIGH;
-	    GpioBtn.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_NO_PUPD;
+    // Send command to Arduino.
+    (void)SPI2_TransferByte(command);
 
-	    //GPIO_PeriClockControl(GPIOC, ENABLE); (no need to enable the clock because we have enable the peripheral clock in GPIO_Init
-	    GPIO_Init(&GpioBtn);
 
+    // Allow Arduino to process the command.
+    delay();
+
+
+    // Send dummy byte to generate clock.
+    // Arduino returns ACK or NACK.
+    return SPI2_TransferByte(0xFF);
 }
 
-uint8_t SPI_VerifyResponse(uint8_t ackbyte)
-{
-	if(ackbyte == 0xF5)
-	{
-		return 1;
-	}
-	return 0;
-}
 
-void delay(void)
-{
-	//for(volatile uint32_t i=0; i < 500000; i++);
-
-	   for(volatile uint32_t i=0; i < 500000/4	; i++)
-	    {
-	        //i++;// empty
-	    }
-}
-
+// ==========================================
+// MAIN FUNCTION
+// ==========================================
 
 int main(void)
 {
+    uint8_t ackbyte;
 
-	uint8_t dummy_write = 0xFF;
-	uint8_t dummy_read;
+    uint8_t analog_read;
 
+    uint8_t led_status;
 
-	//Init the Button
-	GPIO_ButtonInit();
-
-	//This function is used to initialize the GPIO pins to behave as SPI2 pins
-	SPI2_GPIOInits();
-
-	//This function is to initialize the SPI peripheral
-	SPI2_Inits();
-
-	/*making SSOE 1 does NSS output enable.
-	The NSS pin is automatically managed by the hardware.
-	i.e when SPE=1, NSS will be pulled to low
-	and NSS pin will be high when SPE=0
-	*/
-	SPI_SSOEConfig(SPI2, ENABLE);
-
-	while(1)
-	{
-	//wait till button is pressed
-	while(!GPIO_ReadFromInputPin(GPIOC,GPIO_PIN_NO_13))
-
-	//To avoid button de-bouncing related isssues
-	 delay();
-
-	//Enable the SPI2 Peripheral
-	SPI_PeripheralControl(SPI2, ENABLE);
-
-	//1.CMD_LED_CTRL  <pin no(1)>  <value(1)>
-	uint8_t  commndcode = COMMAND_LED_CTRL;
-
-	uint8_t ackbyte;
-
-	uint8_t args[2];
-	SPI_SendData(SPI2, &commndcode, 1);
-
-	//do dummy read to  clear off the RXNE
-	SPI_ReceiveData(SPI2, &dummy_read, 1);
+    uint8_t id[11];
 
 
-	//Send some dummy bits(1 byte) to fetch the response from slave.
-	SPI_SendData(SPI2, &dummy_write, 1);
+    static const uint8_t message[] =
+        "Hello ! How are you ??";
 
-	//Read the ack byte received
-	SPI_ReceiveData(SPI2, &ack_byte, 1);
-
-	if(SPI_VerifyResponse(ackbyte))
-	{
-		args[0] = LED_PIN;
-		args[1] = LED_ON;
-
-		//Send arguments
-		SPI_SendData(SPI2, &args, 2	)
-	}
-
-    //End of Command_led_ctrl
+    const uint8_t message_len =
+        (uint8_t)(sizeof(message) - 1U);
 
 
+    // Initialize button GPIO.
+    GPIO_ButtonInit();
 
 
+    // Initialize SPI GPIO pins.
+    SPI2_GPIOInits();
 
 
-
-	//2. CMD_SENSOR_READ   <analog pin number(1)>
-
-	//wait till button is pressed
-	while(!GPIO_ReadFromInputPin(GPIOC,GPIO_PIN_NO_13))
-
-	//To avoid button de-bouncing related isssues
-	delay();
-
-	commandcode = COMMAND_SENSOR_READ;
-	SPI_SendData(SPI2, &commndcode, 1);
-
-	//do dummy read to  clear off the RXNE
-	SPI_ReceiveData(SPI2, &dummy_read, 1);
+    // Initialize SPI2 peripheral.
+    SPI2_Inits();
 
 
-	//Send some dummy bits(1 byte) to fetch the response from slave.
-	SPI_SendData(SPI2, &dummy_write, 1);
-
-	//Read the ack byte received
-	SPI_ReceiveData(SPI2, &ack_byte, 1);
-
-	if(SPI_VerifyResponse(ackbyte))
-	{
-		args[0] = ANALOG_PIN0	;
-
-		//Send arguments
-		SPI_SendData(SPI2, &args, 2	);
-
-		//do dummy read to  clear off the RXNE
-		SPI_ReceiveData(SPI2, &dummy_read, 1);
+    // Enable hardware NSS output.
+    SPI_SSOEConfig(SPI2, ENABLE);
 
 
-		//Insert some delay so that slave can ready with the data
-		delay();
+    while (1)
+    {
+
+        // ==================================
+        // START SPI SESSION
+        // ==================================
+
+        waitForButtonPressRelease();
+
+        // Enable SPI.
+        // NSS becomes LOW.
+        SPI_PeripheralControl(SPI2, ENABLE);
 
 
-		//Send some dummy bits(1 byte) to fetch the response from slave.
-		SPI_SendData(SPI2, &dummy_write, 1);
+        // ==================================
+        // COMMAND 1: LED CONTROL
+        // ==================================
 
-		uint8_t analog_read;
-		SPI_ReceiveData(SPI2, &analog_read, 1);//To fetch the analog value
-	}
-
-
-
-	//Confirm whether SPI is not busy
-	while(SPI_GetFlagStatus(SPI2,SPI_BUSY_FLAG));
+        ackbyte =
+            SPI2_SendCommandAndGetAck(COMMAND_LED_CTRL);
 
 
-
-	//Enable the SPI peripheral
-	SPI_PeripheralControl(SPI2, DISABLE);
-
-
-	}
+        if (SPI_VerifyResponse(ackbyte))
+        {
+            // Send LED pin number.
+            (void)SPI2_TransferByte(LED_PIN);
 
 
+            // Send LED ON command.
+            (void)SPI2_TransferByte(LED_ON);
+        }
 
-	return 0;
+
+        // ==================================
+        // COMMAND 2: SENSOR READ
+        // ==================================
+
+        waitForButtonPressRelease();
+
+
+        ackbyte =
+            SPI2_SendCommandAndGetAck(COMMAND_SENSOR_READ);
+
+
+        if (SPI_VerifyResponse(ackbyte))
+        {
+            // Select Arduino A0.
+            (void)SPI2_TransferByte(ANALOG_PIN0);
+
+
+            // Allow Arduino to perform analogRead().
+            delay();
+
+
+            // Read sensor value.
+            analog_read = SPI2_TransferByte(0xFF);
+
+            (void)analog_read;
+        }
+
+
+        // ==================================
+        // COMMAND 3: LED READ
+        // ==================================
+
+        waitForButtonPressRelease();
+
+
+        ackbyte =
+            SPI2_SendCommandAndGetAck(COMMAND_LED_READ);
+
+
+        if (SPI_VerifyResponse(ackbyte))
+        {
+            // Send LED pin number.
+            (void)SPI2_TransferByte(LED_PIN);
+
+
+            // Allow Arduino to read LED state.
+            delay();
+
+
+            // Receive LED status.
+            led_status = SPI2_TransferByte(0xFF);
+
+            (void)led_status;
+        }
+
+
+        // ==================================
+        // COMMAND 4: PRINT MESSAGE
+        // ==================================
+
+        waitForButtonPressRelease();
+
+
+        ackbyte =
+            SPI2_SendCommandAndGetAck(COMMAND_PRINT);
+
+
+        if (SPI_VerifyResponse(ackbyte))
+        {
+            // Send message length.
+            (void)SPI2_TransferByte(message_len);
+
+
+            // Send message characters.
+            for (uint8_t i = 0U; i < message_len; i++)
+            {
+                (void)SPI2_TransferByte(message[i]);
+            }
+        }
+
+
+        // ==================================
+        // COMMAND 5: BOARD ID READ
+        // ==================================
+
+        waitForButtonPressRelease();
+
+
+        ackbyte =
+            SPI2_SendCommandAndGetAck(COMMAND_ID_READ);
+
+
+        if (SPI_VerifyResponse(ackbyte))
+        {
+            // Allow Arduino to prepare first ID character.
+            delay();
+
+
+            // Receive 10 characters.
+            for (uint8_t i = 0U; i < 10U; i++)
+            {
+                id[i] = SPI2_TransferByte(0xFF);
+
+                // Allow Arduino to prepare next character.
+                delay();
+            }
+
+
+            // Add string terminator.
+            id[10] = '\0';
+        }
+
+
+        // ==================================
+        // END SPI SESSION
+        // ==================================
+
+        // Wait until SPI transmission is complete.
+        while (SPI_GetFlagStatus(SPI2, SPI_BUSY_FLAG) == FLAG_SET)
+        {
+        }
+
+
+        // Disable SPI.
+        // NSS becomes HIGH.
+        SPI_PeripheralControl(SPI2, DISABLE);
+    }
+
 }
-

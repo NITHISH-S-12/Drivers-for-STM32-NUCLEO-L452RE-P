@@ -61,7 +61,7 @@ main-build: Drivers-for-STM32-NUCLEO-L452RE-P.elf secondary-outputs
 
 # Tool invocations
 Drivers-for-STM32-NUCLEO-L452RE-P.elf Drivers-for-STM32-NUCLEO-L452RE-P.map: $(OBJS) $(USER_OBJS) /home/ubuntu/stm32l452re-p/Drivers-for-STM32-NUCLEO-L452RE-P/STM32L452RETXP_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "Drivers-for-STM32-NUCLEO-L452RE-P.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/ubuntu/stm32l452re-p/Drivers-for-STM32-NUCLEO-L452RE-P/STM32L452RETXP_FLASH.ld" --specs=nosys.specs -Wl,-Map="Drivers-for-STM32-NUCLEO-L452RE-P.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+	arm-none-eabi-gcc -o "Drivers-for-STM32-NUCLEO-L452RE-P.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/ubuntu/stm32l452re-p/Drivers-for-STM32-NUCLEO-L452RE-P/STM32L452RETXP_FLASH.ld" --specs=nosys.specs -Wl,-Map="Drivers-for-STM32-NUCLEO-L452RE-P.map" -Wl,--gc-sections -static -specs=rdimon.specs -lc -lrdimon --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

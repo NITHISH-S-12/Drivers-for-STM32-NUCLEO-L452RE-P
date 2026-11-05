@@ -1,0 +1,10 @@
+../Src/008spi_cmd_handling.c:45:13:delay	2
+../Src/008spi_cmd_handling.c:57:16:buttonIsPressed	1
+../Src/008spi_cmd_handling.c:67:13:waitForButtonPressRelease	6
+../Src/008spi_cmd_handling.c:101:13:SPI2_GPIOInits	1
+../Src/008spi_cmd_handling.c:147:13:SPI2_Inits	1
+../Src/008spi_cmd_handling.c:181:13:GPIO_ButtonInit	1
+../Src/008spi_cmd_handling.c:204:16:SPI_VerifyResponse	2
+../Src/008spi_cmd_handling.c:224:16:SPI2_TransferByte	1
+../Src/008spi_cmd_handling.c:240:16:SPI2_SendCommandAndGetAck	1
+../Src/008spi_cmd_handling.c:260:5:main	9

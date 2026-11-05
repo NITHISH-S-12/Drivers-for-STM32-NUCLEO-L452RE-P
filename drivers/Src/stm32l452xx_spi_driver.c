@@ -65,10 +65,17 @@ void SPI_Init(SPI_Handle_t *pSPIHandle)
 	uint32_t temp_reg2 = 0;
 	temp_reg2 |= pSPIHandle->SPIConfig.SPI_DFF << SPI_CR2_DS;
 
-	//5.Configure the CPOL
+
+	//5. Configure RX FIFO threshold
+	if(pSPIHandle->SPIConfig.SPI_DFF <= 7)
+	{
+	    temp_reg2 |= (1U << SPI_CR2_FRXTH);
+	}
+
+	//6.Configure the CPOL
 	temp_reg |= pSPIHandle->SPIConfig.SPI_CPOL << SPI_CR1_CPOL ;
 
-	//6.Configure the CPHA
+	//7.Configure the CPHA
 	temp_reg |= pSPIHandle->SPIConfig.SPI_CPHA << SPI_CR1_CPHA;
 
 	//Assign the temp_reg value to the CR1 register of SPI
@@ -156,11 +163,11 @@ void SPI_ReceiveData(SPI_RegDef_t *pSPIx, uint8_t *pRxBuffer, uint32_t Len) //Le
 			while(SPI_GetFlagStatus(pSPIx, SPI_RXNE_FLAG) == FLAG_RESET);
 
 			//2.Check the DFF bit in CR2 is less than or equal to 8 bits
-			if((pSPIx->CR2 & ( 15 << SPI_CR2_DS)) <= 7)
+			if(((pSPIx->CR2 >> SPI_CR2_DS) & 0x0F) <= 7)
 			{
 				//Equal or less than 8 bit we will fix as 8 bit frame.
 				//load the data from  DR to Rxbuffer Address.
-				*(pRxBuffer) = pSPIx->DR;
+				*(pRxBuffer) = *((__vo uint8_t *)&pSPIx->DR);
 				Len--;
 				pRxBuffer++;
 			}
@@ -170,7 +177,7 @@ void SPI_ReceiveData(SPI_RegDef_t *pSPIx, uint8_t *pRxBuffer, uint32_t Len) //Le
 				*((uint16_t*)pRxBuffer) = pSPIx->DR;
 				Len--;
 				Len--;
-				(uint16_t*)pRxBuffer++;
+				pRxBuffer += 2;
 			}
 
 
