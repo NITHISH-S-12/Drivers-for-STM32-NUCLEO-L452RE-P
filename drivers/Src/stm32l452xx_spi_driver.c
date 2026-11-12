@@ -273,3 +273,51 @@ void SPI_SSOEConfig(SPI_RegDef_t *pSPIx , uint8_t EnOrDi)
 
 }
 
+
+
+
+
+
+
+/*
+ * IRQ Configuration and ISR handling
+*/
+/*Configure the IRQ number of SPI pin(enabling and setup the interrupt number)*/
+void SPI_IRQInterruptConfig(uint8_t IRQNumber, uint8_t EnorDi)
+{
+if(EnorDi == ENABLE)
+	{
+		if(IRQNumber <= 31)
+		{
+			//Program ISER0 register
+			*NVIC_ISER0 |= (1 << IRQNumber);  //for upto 31 IRQ Number
+		}
+		else if(IRQNumber > 32 && IRQNumber < 64)
+		{
+			//Program ISER1 register
+			*NVIC_ISER1 |= (1 << IRQNumber%32); //for upto 32 to 64 IRQ Number
+		}
+		else if(IRQNumber >= 64 && IRQNumber < 96)
+		{
+			//Program ISER2 register 		 //for upto 64 to 95 IRQ Number
+			*NVIC_ISER2 |= (1 << IRQNumber%64); //for upto 32 to 64 IRQ Number
+		}
+
+	}
+	else
+	{
+				if(IRQNumber <= 31)
+				{
+					*NVIC_ICER0 |= (1 << IRQNumber);  //for upto 31 IRQ Number//Program ICER0 register
+				}
+				else if(IRQNumber > 32 && IRQNumber < 64)
+				{
+					*NVIC_ICER1 |= (1 << IRQNumber%32);
+				}
+				else if(IRQNumber >= 64 && IRQNumber < 96)
+				{
+					*NVIC_ICER2 |= (1 << IRQNumber%64); //for upto 32 to 64 IRQ Number//Program ICER2 register
+				}
+
+	}
+}

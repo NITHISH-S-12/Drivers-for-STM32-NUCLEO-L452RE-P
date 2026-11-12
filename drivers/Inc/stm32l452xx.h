@@ -360,7 +360,7 @@ typedef struct
 
 
 /*
- * IRQ(Interrupt Request) Number of STM32 NUCLEO L452RE-P MCU
+ * IRQ(Interrupt Request) Number of STM32 NUCLEO L452RE-P MCU for GPIOs
  */
 #define IRQ_NO_EXTIO		6
 #define IRQ_NO_EXTI1		7
@@ -369,6 +369,12 @@ typedef struct
 #define IRQ_NO_EXTI4		10
 #define IRQ_NO_EXTI9_5		23
 #define IRQ_NO_EXTI15_10	40
+
+/*
+ * IRQ(Interrupt Request) Number of STM32 NUCLEO L452RE-P MCU for SPIs
+ */
+#define IRQ_NO_SPI1			35
+#define IRQ_NO_SPI2			36
 
 /*
  * Macro for all the possible priority levels

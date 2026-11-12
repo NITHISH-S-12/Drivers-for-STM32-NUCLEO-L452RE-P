@@ -37,7 +37,14 @@ typedef struct
 	SPI_Config_t SPIConfig;
 }SPI_Handle_t;
 
-#endif /* INC_STM32L452XX_SPI_DRIVER_H_ */
+#endif /* INC_STM32L452XX_SPI_DR	/*
+	 * IRQ Configuration and ISR handling
+	 */
+
+	void GPIO_IRQInterruptConfig(uint8_t IRQNumber, uint8_t EnorDi);/*Configure the IRQ number of GPIO pin(enabling and setup the interrupt number)*/
+	void GPIO_IRQPriorityConfig(uint8_t IRQNumber, uint8_t IRQPriority);
+	void GPIO_IRQHandling(uint8_t PinNumber);/*IRQ handling means whenever the interrupt triggers the user application, then the user application call this IRQ handling function to process the interrupt*/
+IVER_H_ */
 
 
 
@@ -149,3 +156,12 @@ void SPI_SSIConfig(SPI_RegDef_t *pSPIx , uint8_t EnOrDi);
  *  Enable or Disable SSOE
  */
 void SPI_SSOEConfig(SPI_RegDef_t *pSPIx , uint8_t EnOrDi);
+
+
+
+/*
+ * IRQ Configuration and ISR handling
+ */
+void SPI_IRQInterruptConfig(uint8_t IRQNumber, uint8_t EnorDi);/*Configure the IRQ number of GPIO pin(enabling and setup the interrupt number)*/
+void SPI_IRQPriorityConfig(uint8_t IRQNumber, uint8_t IRQPriority);
+void SPI_IRQHandling(uint8_t PinNumber);/*IRQ handling means whenever the interrupt triggers the user application, then the user application call this IRQ handling function to process the interrupt*/
