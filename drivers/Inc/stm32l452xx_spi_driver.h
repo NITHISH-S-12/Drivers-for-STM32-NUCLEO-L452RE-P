@@ -33,14 +33,17 @@ typedef struct
  */
 typedef struct
 {
-	SPI_RegDef_t *pSPIx; /*!<Holds the base address of SPIx(x:0,1,2) >*/
+	SPI_RegDef_t *pSPIx; /*!<Holds the base address of SPIx(x:0,1,#endif2) >*/
 	SPI_Config_t SPIConfig;
+
 	uint8_t *pTxBuffer;  /*!<To store the app. Tx buffer address>*/
-	uint8_t *RxBuffer;	 /*!<To store the app. Rx buffer address>*/
-	uint32_t *TxLen;	 /*!<To store Tx Len>*/
-	uint32_t *RxLen;	 /*!<To store Rx Len>*/
-	uint8_t  *TxState	 /*!<To store Tx state>*/
-	uint8_t  *Rxstate 	 /*!<To store Rx state>*/
+	uint8_t *pRxBuffer;	 /*!<To store the app. Rx buffer address>*/
+
+	uint32_t TxLen;	 /*!<To store Tx Len>*/
+	uint32_t RxLen;	 /*!<To store Rx Len>*/
+
+	uint8_t  TxState;	 /*!<To store Tx state>*/
+	uint8_t  RxState; 	 /*!<To store Rx state>*/
 }SPI_Handle_t;
 
 
@@ -51,14 +54,14 @@ typedef struct
 #define SPI_BUSY_IN_RX		1
 #define SPI_BUSY_IN_TX		2
 
-#endif /* INC_STM32L452XX_SPI_DR	/*
+/* INC_STM32L452XX_SPI_DR
 	 * IRQ Configuration and ISR handling
 	 */
 
 	void GPIO_IRQInterruptConfig(uint8_t IRQNumber, uint8_t EnorDi);/*Configure the IRQ number of GPIO pin(enabling and setup the interrupt number)*/
 	void GPIO_IRQPriorityConfig(uint8_t IRQNumber, uint8_t IRQPriority);
 	void GPIO_IRQHandling(uint8_t PinNumber);/*IRQ handling means whenever the interrupt triggers the user application, then the user application call this IRQ handling function to process the interrupt*/
-IVER_H_ */
+
 
 
 
@@ -187,3 +190,5 @@ void SPI_IRQInterruptConfig(uint8_t IRQNumber, uint8_t EnorDi);/*Configure the I
 void SPI_IRQPriorityConfig(uint8_t IRQNumber, uint8_t IRQPriority);
 
 void SPI_IRQHandling(SPI_Handle_t *pHandle);/*IRQ handling means whenever the interrupt triggers the user application, then the user application call this IRQ handling function to process the interrupt*/
+
+#endif

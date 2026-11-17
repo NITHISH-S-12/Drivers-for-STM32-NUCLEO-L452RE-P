@@ -189,10 +189,9 @@ void SPI_ReceiveData(SPI_RegDef_t *pSPIx, uint8_t *pRxBuffer, uint32_t Len) //Le
 
 
 
-void SPI_SendDataIT(SPI_Handle_t *pSPIHandle, uint8_t *pTxBuffer, uint32_t Len)
+uint8_t SPI_SendDataIT(SPI_Handle_t *pSPIHandle, uint8_t *pTxBuffer, uint32_t Len)
 {
 		uint8_t state = pSPIHandle->TxState;
-		i
 		if(state != SPI_BUSY_IN_TX)
 		{
 			//1.Save the Tx buffer address and Len information in some global variables
@@ -204,7 +203,7 @@ void SPI_SendDataIT(SPI_Handle_t *pSPIHandle, uint8_t *pTxBuffer, uint32_t Len)
 			pSPIHandle->TxState = SPI_BUSY_IN_TX;
 
 			//3. Enable the TXEIE control bit to get interrupt whenever TXE flag is set in SR
-			pSPIHandle->pSPIx-CR2 |= ( 1 << SPI_CR2_TXEIE);
+			pSPIHandle->pSPIx->CR2 |= ( 1 << SPI_CR2_TXEIE);
 		}
 
 		return state;
@@ -215,7 +214,6 @@ uint8_t SPI_ReceiveDataIT(SPI_Handle_t *pSPIHandle, uint8_t *pRxBuffer, uint32_t
 
 
 	uint8_t state = pSPIHandle->RxState;
-	i
 	if(state != SPI_BUSY_IN_RX)
 	{
 		//1.Save the Tx buffer address and Len information in some global variables
@@ -227,7 +225,7 @@ uint8_t SPI_ReceiveDataIT(SPI_Handle_t *pSPIHandle, uint8_t *pRxBuffer, uint32_t
 		pSPIHandle->RxState = SPI_BUSY_IN_RX;
 
 		//3. Enable the TXEIE control bit to get interrupt whenever TXE flag is set in SR
-		pSPIHandle->pSPIx-CR2 |= ( 1 << SPI_CR2_RXNEIE);
+		pSPIHandle->pSPIx->CR2 |= ( 1 << SPI_CR2_RXNEIE);
 	}
 
 	return state;
@@ -375,8 +373,34 @@ if(EnorDi == ENABLE)
 void SPI_IRQHandling(SPI_Handle_t *pHandle)
 {
 	uint8_t temp1, temp2;
+
 	//First check for TXE
-	temp = pHandle->pSPIx->SRL;
+	temp1 = pHandle->pSPIx->SR & (1 << SPI_SR_TXE);
+	temp2 = pHandle->pSPIx->CR2 & (1 << SPI_SR_TXEIE);
+
+	if(temp1 && temp2)
+	{
+		//handle txe
+		spi_txe_interrupt_handler();
+	}
+
+	//Check for RXE
+	temp1 = pHandle->pSPIx->SR & (1 << SPI_SR_RXNE);
+	temp2 = pHandle->pSPIx->CR2 & (1 << SPI_CR2_RXNEIE);
+
+	if(temp1 && temp2)
+	{
+		//handle rxe
+		spi_rxne_interrupt_handler();
+	}
+
+	//check for ovr(overrun error) flag
+	temp1 = pHandle->pSPIx->SR & (1 << SPI_SR_OVR);
+	temp2 = pHandle->pSPIx->CR2 & (1 << SPI_CR2_ERRIE);
+
+	if(temp1 && temp2)
+	{
+		//handle ovr error
+		spi_ovr_err_interrupt_handler();
+	}
 }
-
-

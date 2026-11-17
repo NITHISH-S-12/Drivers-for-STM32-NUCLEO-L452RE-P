@@ -171,5 +171,10 @@
 			<resource resourceType="PROJECT" workspacePath="/stm32l4xx_drivers"/>
 		</configuration>
 	</storageModule>
-	<storageModule moduleId="scannerConfiguration"/>
+	<storageModule moduleId="scannerConfiguration">
+		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		<scannerConfigBuildInfo instanceId="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.951285151;com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.951285151.;com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.517001872;com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.1631898166">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+	</storageModule>
 </cproject>
