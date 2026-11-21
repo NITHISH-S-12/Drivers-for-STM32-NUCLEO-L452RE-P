@@ -54,13 +54,23 @@ typedef struct
 #define SPI_BUSY_IN_RX		1
 #define SPI_BUSY_IN_TX		2
 
+
+/*
+ * Possible SPI Application Events
+ */
+#define SPI_EVENT_TX_CMPLT  1
+#define SPI_EVENT_RX_CMPLT  2
+#define SPI_EVENT_OVR_ERR   3
+#define SPI_EVENT_CRC_ERR	4
+
+
 /* INC_STM32L452XX_SPI_DR
 	 * IRQ Configuration and ISR handling
 	 */
 
-	void GPIO_IRQInterruptConfig(uint8_t IRQNumber, uint8_t EnorDi);/*Configure the IRQ number of GPIO pin(enabling and setup the interrupt number)*/
-	void GPIO_IRQPriorityConfig(uint8_t IRQNumber, uint8_t IRQPriority);
-	void GPIO_IRQHandling(uint8_t PinNumber);/*IRQ handling means whenever the interrupt triggers the user application, then the user application call this IRQ handling function to process the interrupt*/
+void GPIO_IRQInterruptConfig(uint8_t IRQNumber, uint8_t EnorDi);/*Configure the IRQ number of GPIO pin(enabling and setup the interrupt number)*/
+void GPIO_IRQPriorityConfig(uint8_t IRQNumber, uint8_t IRQPriority);
+void GPIO_IRQHandling(uint8_t PinNumber);/*IRQ handling means whenever the interrupt triggers the user application, then the user application call this IRQ handling function to process the interrupt*/
 
 
 
@@ -142,7 +152,7 @@ void SPI_PeriClockControl(SPI_RegDef_t *pSPIx, uint8_t EnorDi);
 
 
 /*
- * Init  and De-init
+ * Init  and De-initselected
  */
 void SPI_Init(SPI_Handle_t *pSPIHandle);
 void SPI_DeInit(SPI_RegDef_t *pSPIx);
@@ -190,5 +200,19 @@ void SPI_IRQInterruptConfig(uint8_t IRQNumber, uint8_t EnorDi);/*Configure the I
 void SPI_IRQPriorityConfig(uint8_t IRQNumber, uint8_t IRQPriority);
 
 void SPI_IRQHandling(SPI_Handle_t *pHandle);/*IRQ handling means whenever the interrupt triggers the user application, then the user application call this IRQ handling function to process the interrupt*/
+
+
+/*
+ * other Peripheral Control APIs
+ */
+void SPI_ClearOVRFlag(SPI_RegDef_t *pSPIx);
+void SPI_CloseTransmission(SPI_Handle_t *pSPIHandle);
+void SPI_CloseReception(SPI_Handle_t *pSPIHandle);
+
+
+/*
+ * Application Callback
+ */
+void SPI_ApplicationEventCallback(SPI_Handle_t *pSPIHandle, uint8_t AppEv);
 
 #endif

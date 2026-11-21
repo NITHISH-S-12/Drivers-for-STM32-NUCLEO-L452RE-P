@@ -9,7 +9,10 @@
 #define INC_STM32L452XX_H_
 
 #include<stdint.h>
+#include<stddef.h>
+
 #define __vo volatile
+#define __weak __attribute__((weak))
 
 /****************************************PROCESSOR SPCIFIC DETAILS*****************************************/
 /*

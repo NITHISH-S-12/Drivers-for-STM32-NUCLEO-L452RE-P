@@ -8,6 +8,14 @@
 #include "stm32l452xx_spi_driver.h"
 #include "stm32l452xx.h"
 
+
+static void spi_txe_interrupt_handler(SPI_Handle_t *pSPIHandle);
+static void spi_rxne_interrupt_handler(SPI_Handle_t *pSPIHandle);
+static void spi_ovr_err_interrupt_handler(SPI_Handle_t *pSPIHandle);
+
+
+
+
 void SPI_PeriClockControl(SPI_RegDef_t *pSPIx, uint8_t EnorDi)
 {
 		if(EnorDi == ENABLE)
@@ -185,10 +193,6 @@ void SPI_ReceiveData(SPI_RegDef_t *pSPIx, uint8_t *pRxBuffer, uint32_t Len) //Le
 
 }
 
-
-
-
-
 uint8_t SPI_SendDataIT(SPI_Handle_t *pSPIHandle, uint8_t *pTxBuffer, uint32_t Len)
 {
 		uint8_t state = pSPIHandle->TxState;
@@ -258,13 +262,6 @@ void SPI_PeripheralControl(SPI_RegDef_t *pSPIx , uint8_t EnOrDi)
 	}
 
 }
-
-
-
-
-
-
-
 /*********************************************************************
  * @fn              - SPI_SSI Config
  *
@@ -320,12 +317,6 @@ void SPI_SSOEConfig(SPI_RegDef_t *pSPIx , uint8_t EnOrDi)
 
 }
 
-
-
-
-
-
-
 /*
  * IRQ Configuration and ISR handling
 */
@@ -370,18 +361,19 @@ if(EnorDi == ENABLE)
 }
 
 
+
 void SPI_IRQHandling(SPI_Handle_t *pHandle)
 {
 	uint8_t temp1, temp2;
 
 	//First check for TXE
 	temp1 = pHandle->pSPIx->SR & (1 << SPI_SR_TXE);
-	temp2 = pHandle->pSPIx->CR2 & (1 << SPI_SR_TXEIE);
+	temp2 = pHandle->pSPIx->CR2 & (1 << SPI_CR2_TXE);
 
 	if(temp1 && temp2)
 	{
 		//handle txe
-		spi_txe_interrupt_handler();
+		spi_txe_interrupt_handler(pHandle);
 	}
 
 	//Check for RXE
@@ -391,7 +383,7 @@ void SPI_IRQHandling(SPI_Handle_t *pHandle)
 	if(temp1 && temp2)
 	{
 		//handle rxe
-		spi_rxne_interrupt_handler();
+		spi_rxne_interrupt_handler(pHandle);
 	}
 
 	//check for ovr(overrun error) flag
@@ -401,6 +393,148 @@ void SPI_IRQHandling(SPI_Handle_t *pHandle)
 	if(temp1 && temp2)
 	{
 		//handle ovr error
-		spi_ovr_err_interrupt_handler();
+		spi_ovr_err_interrupt_handler(pHandle);
 	}
 }
+
+//Some Helper Function Implementation
+
+static void spi_txe_interrupt_handler(SPI_Handle_t *pSPIHandle)
+{
+
+			//2.Check the DFF bit in CR2 is less than or equal to 8 bits
+			if(((pSPIHandle->pSPIx->CR2 >> SPI_CR2_DS) & 0x0F) <= 7)
+			{
+				//Equal or less than 8 bit we will fix as 8 bit frame.
+				//load the data in to DR.
+				 *((__vo uint8_t *)&pSPIHandle->pSPIx->DR) = *pSPIHandle->pTxBuffer;
+
+				 /*    HOW DOES IT WORK?
+				 *
+				 *    Step 1: &pSPIx->DR
+				 *            Gets the ADDRESS of the SPI data register.
+				 *
+				 *    Step 2: (__vo uint8_t *)&pSPIx->DR
+				 *            Treats that address as a pointer to an 8-bit
+				 *            volatile object.
+				 *
+				 *    Step 3: *((__vo uint8_t *)&pSPIx->DR)
+				 *            The * dereferences the pointer.
+				 *            It refers to the actual register memory location,
+				 *            so we can write a value to it.
+				 *
+				 *    Step 4: *pTxBuffer
+				 *            Reads one byte from the transmit buffer.
+				 *
+				 *    Step 5: Assignment (=)
+				 *            Writes that byte to the SPI data register
+				 *            using an 8-bit access.*/
+				 /*Since in the stm32 nucleo l452re-p data register is 16bit value.We are convert the address of data register as pointer of 16bit value to 8bit value
+				  * so if we read that data register then first 8 bit only we can fetch
+				  */
+				pSPIHandle->TxLen--;
+				pSPIHandle->pTxBuffer++;
+			}
+			else
+			{
+				//more than 8 bits we will fix as 16 bit frame.
+				*((__vo uint16_t*)&pSPIHandle->pSPIx->DR) = *((uint16_t*)pSPIHandle->pTxBuffer);
+				pSPIHandle->TxLen -= 2;
+				pSPIHandle->pTxBuffer += 2;
+			}
+
+
+
+			if(!pSPIHandle->TxLen)
+			{
+				//If TxLen is zero, so close the spi transmission and inform the application that Tx is over
+				SPI_CloseTransmission(pSPIHandle);
+				SPI_ApplicationEventCallback(pSPIHandle,SPI_EVENT_TX_CMPLT);
+			}
+}
+
+
+
+static void spi_rxne_interrupt_handler(SPI_Handle_t *pSPIHandle)
+{
+
+
+	//1.Check the DFF bit in CR2 is less than or equal to 8 bits
+	if(((pSPIHandle->pSPIx->CR2 >> SPI_CR2_DS) & 0x0F) <= 7)
+		//Equal or less than 8 bit we will fix as 8 bit frame.
+		//load the data from  DR to Rxbuffer Address.
+	{
+		*(pSPIHandle->pRxBuffer) = *((__vo uint8_t *)&pSPIHandle->pSPIx->DR);
+		pSPIHandle->RxLen--;
+		pSPIHandle->pRxBuffer++;
+	}
+	else
+	{
+		//more than 8 bits we will fix as 16 bit frame.
+		*((uint16_t*)pSPIHandle->pRxBuffer) = pSPIHandle->pSPIx->DR;
+		pSPIHandle->RxLen--;
+		pSPIHandle->RxLen--;
+		pSPIHandle->pRxBuffer += 2;
+	}
+
+	if(!pSPIHandle->RxLen)
+	{
+		//When reception is completed, turn off the RXNEIE interrupt
+		SPI_CloseReception(pSPIHandle);
+		SPI_ApplicationEventCallback(pSPIHandle,SPI_EVENT_RX_CMPLT);
+
+	}
+
+
+}
+
+static void spi_ovr_err_interrupt_handler(SPI_Handle_t *pSPIHandle)
+{
+
+	uint8_t temp;
+	//1.clear the fLAG
+	//We should not read the data and status register when the TX state is busy Because, the application has to read, right? Because that data may be required by the application.
+	if(pSPIHandle->TxState != SPI_BUSY_IN_TX)
+	{
+		temp = pSPIHandle->pSPIx->DR;
+		temp = pSPIHandle->pSPIx->SR;
+	}
+
+	//2.Inform the application
+	SPI_ApplicationEventCallback(pSPIHandle, SPI_EVENT_OVR_ERR);
+
+}
+
+
+void SPI_ClearOVRFlag(SPI_RegDef_t *pSPIx)
+{
+	uint8_t temp;
+	temp = pSPIx->DR;
+	temp = pSPIx->SR;
+	(void)temp;
+}
+
+void SPI_CloseTransmission(SPI_Handle_t *pSPIHandle)
+{
+	pSPIHandle->pSPIx->CR2 &= ~ (1 << SPI_CR2_TXEIE);
+	pSPIHandle->pTxBuffer = NULL;
+	pSPIHandle->TxLen = 0;
+	pSPIHandle->TxState = SPI_READY;
+}
+
+
+void SPI_CloseReception(SPI_Handle_t *pSPIHandle)
+{
+	pSPIHandle->pRxBuffer = NULL;
+	pSPIHandle->RxLen = 0;
+	pSPIHandle->RxState = SPI_READY;
+	SPI_ApplicationEventCallback(pSPIHandle,SPI_EVENT_RX_CMPLT);
+}
+
+
+__weak void SPI_ApplicationEventCallback(SPI_Handle_t *pSPIHandle, uint8_t AppEv)
+{
+	//This is a weak implementation. The application may override this function.
+}
+
+
